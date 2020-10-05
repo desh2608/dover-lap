@@ -27,20 +27,22 @@ Example:
 
 ## Optional arguments
 
-* **-u, --uem** 
+```
+-u, --uem 
 : UEM file indicating scoring regions
 
-* **-c, --channel**
+-c, --channel
 : Channel ID for output RTTM (Default: 1)
 
-* **--second-maximal**
+--second-maximal
 : Boolean argument to specify whether to apply an additional round of maximal
 matching in the label mapping stage. This may perform slightly better for larger
 number of inputs (Default: False)
 
-* **--dover-weight**
+--dover-weight
 : Parameter for DOVER-style rank weighting applied to hypothesis for label
 voting, e.g. w_k = (1/k)^0.1, where k is the rank (Default: 0.1)
+```
 
 ## Results
 
