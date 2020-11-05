@@ -26,6 +26,8 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
         n = len(turns_list)
         k = int((n * (n-1)/2))
 
+        has_single_speaker = False
+
         for i, ref_turns in enumerate(turns_list):
             for j, sys_turns in enumerate(turns_list):
                 if (j <= i):
@@ -33,6 +35,9 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
                 cost = []
                 ref_groups = {key: list(group) for key, group in groupby(ref_turns, lambda x: x.speaker_id)};
                 sys_groups = {key: list(group) for key, group in groupby(sys_turns, lambda x: x.speaker_id)};
+
+                if (len(ref_groups.keys())==1 or len(sys_groups.keys())==1):
+                    has_single_speaker = True
                 for ref_spk_id in sorted(ref_groups.keys()):
                     cur_row = []
                     ref_spk_turns = ref_groups[ref_spk_id]
@@ -47,7 +52,13 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
                 new_axis.remove(j)
                 pairwise_costs[(i,j)] = np.expand_dims(np.array(cost), axis=tuple(k for k in new_axis))
         
-        cost_tensor = np.sum(list(pairwise_costs.values()))
+        if has_single_speaker: # iterate and add since numpy cannot broadcast with 2 dummy dimensions
+            vals = list(pairwise_costs.values())
+            cost_tensor = vals[0]
+            for val in vals[1:]:
+                cost_tensor = np.add(cost_tensor,val)
+        else: # otherwise use broadcasting
+            cost_tensor = np.sum(list(pairwise_costs.values()))
 
         weights = np.array([0]*len(turns_list), dtype=float)
         for i in range(len(turns_list)):
