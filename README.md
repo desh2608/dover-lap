@@ -75,7 +75,14 @@ to run on a laptop.
 
 ## Citation
 
-Coming soon.
+```
+@article{Raj2021Doverlap,
+  title={{DOVER-Lap}: A Method for Combining Overlap-aware Diarization Outputs},
+  author={D.Raj and P.Garcia and Z.Huang and S.Watanabe and D.Povey and A.Stolcke and S.Khudanpur},
+  journal={2021 IEEE Spoken Language Technology Workshop (SLT)},
+  year={2021}
+}
+```
 
 ## Contact
 
