@@ -1,5 +1,5 @@
 # DOVER-Lap
-Method for combining overlap-aware diarization system outputs.
+Official implementation for [DOVER-Lap: A method for combining overlap-aware diarization outputs](https://arxiv.org/pdf/2011.01997.pdf).
 
 ## Prerequisites
 
