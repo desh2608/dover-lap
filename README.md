@@ -1,28 +1,27 @@
 # DOVER-Lap
 Official implementation for [DOVER-Lap: A method for combining overlap-aware diarization outputs](https://arxiv.org/pdf/2011.01997.pdf).
 
-## Prerequisites
+## Installation
 
-We use RTTM processing code from the [dscore](https://github.com/nryant/dscore) repository to process the input RTTMs
-into a list of turns. The codebase internally uses `intervaltree` package, which
-can be installed as
+DOVER-Lap can be simply installed using `pip`, which will also install the
+two dependencies: `numpy` and `intervaltree`, if not present.
 
 ```
-python -m pip install -U intervaltree
+pip install .
 ```
 
 ## How to run
 
-Clone this repository and then run the following script:
+After installation, run
 
 ```
-./run.py -i <input-RTTMs> -o <output-RTTM>
+dover-lap -i <input-RTTMs> -o <output-RTTM>
 ```
 
 Example:
 
 ```
-./run.py -i egs/ami/rttm_test_* -o egs/ami/rttm_dl_test
+dover-lap -i egs/ami/rttm_test_* -o egs/ami/rttm_dl_test
 ```
 
 ## Optional arguments
@@ -50,8 +49,8 @@ We provide a sample result on the AMI mix-headset test set. The results can be
 obtained as follows:
 
 ```
-./run.py -i egs/ami/rttm_test_* -o egs/ami/rttm_dl_test
-./libs/md-eval.pl -r egs/ami/ref_rttm_test -s egs/ami/rttm_dl_test
+dover-lap -i egs/ami/rttm_test_* -o egs/ami/rttm_dl_test
+md-eval.pl -r egs/ami/ref_rttm_test -s egs/ami/rttm_dl_test
 ```
 
 and similarly for the input hypothesis. The DER results are shown below.
@@ -63,6 +62,7 @@ and similarly for the input hypothesis. The DER results are shown below.
 | Region Proposal Network           |  **9.49** | 7.68 |  8.25 | 25.43 |
 | DOVER-Lap                         | 10.66 | **2.03** |  **7.82** | **20.50** |
 
+**Note:** A version of md-eval.pl can be found in `dover_lap/libs`.
 
 ## Running time
 

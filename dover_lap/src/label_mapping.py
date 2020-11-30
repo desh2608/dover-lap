@@ -6,8 +6,8 @@ from __future__ import unicode_literals
 import numpy as np
 import itertools, sys
 
-from libs.utils import groupby
-from libs.turn import Turn
+from dover_lap.libs.utils import groupby
+from dover_lap.libs.turn import Turn
 
 __all__ = ['get_mapped_turns_list']
 

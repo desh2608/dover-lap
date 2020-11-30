@@ -12,13 +12,13 @@ import argparse
 import os
 import sys
 
-from libs.rttm import load_rttm
-from libs.turn import merge_turns, trim_turns
-from libs.six import iterkeys
-from libs.uem import gen_uem, load_uem
-from libs.utils import error, info, warn, xor
+from dover_lap.libs.rttm import load_rttm
+from dover_lap.libs.turn import merge_turns, trim_turns
+from dover_lap.libs.six import iterkeys
+from dover_lap.libs.uem import gen_uem, load_uem
+from dover_lap.libs.utils import error, info, warn, xor
 
-from src.doverlap import DOVERLap
+from dover_lap.src.doverlap import DOVERLap
 
 def read_args():
     # Parse command line arguments.
