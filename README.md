@@ -7,7 +7,7 @@ DOVER-Lap can be simply installed using `pip`, which will also install the
 two dependencies: `numpy` and `intervaltree`, if not present.
 
 ```
-pip install .
+pip install dover-lap
 ```
 
 ## How to run

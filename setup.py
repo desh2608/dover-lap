@@ -1,15 +1,15 @@
 import os
-from pathlib import Path
 
 from setuptools import find_packages, setup
 
-project_root = Path(__file__).parent
+with open('requirements.txt') as f:
+  requirements = f.read().splitlines()
 
-install_requires = (project_root / 'requirements.txt').read_text().splitlines()
+long_description = open('README.md').read()
 
 setup(
     name = "dover-lap",
-    version = "0.1.0",
+    version = "0.1.1",
     author = "Desh Raj",
     author_email = "r.desh26@gmail.com",
     description = "Combine overlap-aware diarization output RTTMs",
@@ -17,8 +17,9 @@ setup(
     url = "https://github.com/desh2608/dover-lap",
     license='Apache-2.0 License',
     packages=find_packages(),
-    install_requires=install_requires,
-    long_description=(project_root / 'README.md').read_text(),
+    install_requires=requirements,
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
