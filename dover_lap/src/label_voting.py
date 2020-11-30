@@ -7,9 +7,9 @@ from collections import defaultdict, namedtuple, Counter
 import numpy as np
 import itertools, sys
 
-from libs.six import iteritems, itervalues
-from libs.utils import groupby
-from libs.turn import Turn
+from dover_lap.libs.six import iteritems, itervalues
+from dover_lap.libs.utils import groupby
+from dover_lap.libs.turn import Turn
 
 __all__ = ['get_combined_turns']
 

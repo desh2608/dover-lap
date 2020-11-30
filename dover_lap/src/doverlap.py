@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from libs.utils import groupby
+from dover_lap.libs.utils import groupby
 
 from .label_mapping import get_mapped_turns_list
 from .label_voting import get_combined_turns
