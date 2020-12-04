@@ -12,6 +12,7 @@ from dover_lap.libs.utils import groupby
 from dover_lap.libs.turn import Turn
 
 __all__ = ['get_combined_turns']
+EPS = 1e-3 # 0.0001 because float comparisons are inaccurate
 
 def get_combined_turns(file_to_turns_list, file_to_weights):
     """
@@ -67,7 +68,7 @@ def _get_regions(turns_list, weights=None):
                 running_speakers_dict[token[2]] = token[3]
         else:
             running_speakers_dict[token[2]] -= token[3]
-            if running_speakers_dict[token[2]] <= 0.001:
+            if running_speakers_dict[token[2]] <= EPS:
                 running_speakers_dict[token[2]] = 0
         region_start = token[1]
 
@@ -84,20 +85,18 @@ def _combine_turns(turns_list, file_id, weights=None):
     
     for region in regions:
         spk_weights = sorted(region[2], key=lambda x:x[1], reverse=True)
-        num_spk = int(round(sum([spk_weights[1] for spk_weights in region[2]])))
-        
+        num_spk = max(1,int(round(sum([spk_weights[1] for spk_weights in region[2]]))))
         i = 0
         while i < num_spk and len(spk_weights) > 0:
             cur_weight = spk_weights[0][1]
-            filtered_ids = [spk_id for (spk_id,weight) in spk_weights if weight == cur_weight]
+            filtered_ids = [spk_id for (spk_id,weight) in spk_weights if np.abs(weight-cur_weight)<EPS]
 
             dur = (region[1] - region[0])/len(filtered_ids)
-            if (region[1]>region[0]+0.001): # 0.001 because float comparisons are inaccurate
+            if (np.abs(region[1]>region[0]+EPS):
                 for j,spk_id in enumerate(filtered_ids):
                     turn = Turn(region[0]+j*dur, offset=region[0]+(j+1)*dur, speaker_id=spk_id, file_id=file_id)
                     combined_turns.append(turn)
-            i += 1       
+            i += 1
             spk_weights = spk_weights[len(filtered_ids):] # remove the spk ids that have been seen
 
-
-    return combined_turns   
+    return combined_turns

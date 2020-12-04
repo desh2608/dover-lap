@@ -66,7 +66,6 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
             weights[i] = -1*sum([np.sum(x) for x in cur_pairwise_costs])
 
         out_weights = _compute_weights(weights, dover_weight)
-        # print (out_weights)
         file_to_weights[file_id] = out_weights
 
         # Sort the cost tensor
@@ -131,7 +130,6 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
                 for turn in spk_groups[spk_id]:
                     mapped_turns.append(Turn(turn.onset, turn.offset, speaker_id=new_spk_id, file_id=file_id))
             mapped_turns_list.append(mapped_turns)
-
         file_to_mapped_turns_list[file_id] = mapped_turns_list
 
     return file_to_mapped_turns_list, file_to_weights
