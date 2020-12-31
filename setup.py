@@ -9,7 +9,7 @@ long_description = open('README.md').read()
 
 setup(
     name = "dover-lap",
-    version = "0.1.1",
+    version = "0.2.0",
     author = "Desh Raj",
     author_email = "r.desh26@gmail.com",
     description = "Combine overlap-aware diarization output RTTMs",
