@@ -60,7 +60,7 @@ and similarly for the input hypothesis. The DER results are shown below.
 | Overlap-aware VB resegmentation   |  9.84 | 2.06 |  9.60 | 21.50 |
 | Overlap-aware spectral clustering | 11.48 | 2.27 |  9.81 | 23.56 |
 | Region Proposal Network           |  **9.49** | 7.68 |  8.25 | 25.43 |
-| DOVER-Lap                         | 10.66 | **2.03** |  **7.82** | **20.50** |
+| DOVER-Lap                         | 10.96 | **1.99** |  **7.88** | **20.82** |
 
 **Note:** A version of md-eval.pl can be found in `dover_lap/libs`.
 
@@ -72,6 +72,16 @@ inputs, but it should be reasonable for combining up to 10 input hypotheses.
 
 For smaller number of inputs (up to 5), the algorithm should take only a few seconds
 to run on a laptop.
+
+## Combining 2 systems with DOVER-Lap
+
+DOVER-Lap is meant to be used to combine **more than 2 systems**, since
+black-box voting between 2 systems does not make much sense. Still, if 2 systems
+are provided as input, we fall back on the Hungarian algorithm for label mapping,
+since it is provably optimal for this case. Both the systems are assigned equal
+weights, and in case of voting conflicts, the region is equally divided among the
+two labels. This is not the intended use case and will almost certainly lead
+to performance degradation.
 
 ## Citation
 
