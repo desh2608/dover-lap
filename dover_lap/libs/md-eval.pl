@@ -2137,7 +2137,6 @@ sub exclude_single_speech_from_uem {
     
     my ($uem_data, $rttm_data) = @_;
     my ($token, @spkr_events, @single_events, $event, $spkr_count, $tbeg_single, $uem, @events, $uem_ex);
-    use Array::Utils qw(:all);
 
 #single speaker segments computed from SPEAKER data
     foreach $token (@$rttm_data) {

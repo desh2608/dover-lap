@@ -92,7 +92,7 @@ def _combine_turns(turns_list, file_id, weights=None):
             filtered_ids = [spk_id for (spk_id,weight) in spk_weights if np.abs(weight-cur_weight)<EPS]
 
             dur = (region[1] - region[0])/len(filtered_ids)
-            if (np.abs(region[1]>region[0]+EPS):
+            if np.abs(region[1]-region[0])>EPS:
                 for j,spk_id in enumerate(filtered_ids):
                     turn = Turn(region[0]+j*dur, offset=region[0]+(j+1)*dur, speaker_id=spk_id, file_id=file_id)
                     combined_turns.append(turn)
