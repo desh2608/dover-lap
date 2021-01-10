@@ -9,11 +9,11 @@ from __future__ import unicode_literals
 from .turn import Turn
 from .utils import format_float
 
-__all__ = ['load_rttm', 'write_rttm', 'validate_rttm']
+__all__ = ["load_rttm", "write_rttm", "validate_rttm"]
 
 
 def _parse_rttm_line(line):
-    line = line.decode('utf-8').strip()
+    line = line.decode("utf-8").strip()
     fields = line.split()
     if len(fields) < 9:
         raise IOError('Number of fields < 9. LINE: "%s"' % line)
@@ -66,12 +66,12 @@ def load_rttm(rttmf):
     NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition
     Evaluation Plan. https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
     """
-    with open(rttmf, 'rb') as f:
+    with open(rttmf, "rb") as f:
         turns = []
         speaker_ids = set()
         file_ids = set()
         for line in f:
-            if line.startswith(b'SPKR-INFO'):
+            if line.startswith(b"SPKR-INFO"):
                 continue
             turn = _parse_rttm_line(line)
             turns.append(turn)
@@ -103,21 +103,23 @@ def write_rttm(rttmf, turns, n_digits=3):
     NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition
     Evaluation Plan. https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
     """
-    with open(rttmf, 'wb') as f:
+    with open(rttmf, "wb") as f:
         for turn in turns:
-            fields = ['SPEAKER',
-                      turn.file_id,
-                      '1',
-                      format_float(turn.onset, n_digits),
-                      format_float(turn.dur, n_digits),
-                      '<NA>',
-                      '<NA>',
-                      turn.speaker_id,
-                      '<NA>',
-                      '<NA>']
-            line = ' '.join(fields)
-            f.write(line.encode('utf-8'))
-            f.write(b'\n')
+            fields = [
+                "SPEAKER",
+                turn.file_id,
+                "1",
+                format_float(turn.onset, n_digits),
+                format_float(turn.dur, n_digits),
+                "<NA>",
+                "<NA>",
+                turn.speaker_id,
+                "<NA>",
+                "<NA>",
+            ]
+            line = " ".join(fields)
+            f.write(line.encode("utf-8"))
+            f.write(b"\n")
 
 
 def validate_rttm(rttmf):
@@ -139,12 +141,12 @@ def validate_rttm(rttmf):
     error_messages : list of str
          Errors encountered in file.
     """
-    with open(rttmf, 'rb') as f:
+    with open(rttmf, "rb") as f:
         file_ids = set()
         speaker_ids = set()
         error_messages = []
         for line in f:
-            if line.startswith(b'SPKR-INFO'):
+            if line.startswith(b"SPKR-INFO"):
                 continue
             try:
                 turn = _parse_rttm_line(line)

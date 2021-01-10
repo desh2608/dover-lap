@@ -7,6 +7,8 @@ with open('requirements.txt') as f:
 
 long_description = open('README.md').read()
 
+dev_requires = ['pre-commit','black','flake8']
+
 setup(
     name = "dover-lap",
     version = "0.2.0",

@@ -12,9 +12,12 @@ from dover_lap.libs.turn import Turn
 from scipy.optimize import linear_sum_assignment
 
 
-__all__ = ['get_mapped_turns_list']
+__all__ = ["get_mapped_turns_list"]
 
-def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_weight=0.1):
+
+def get_mapped_turns_list(
+    file_to_turns_list, run_second_maximal=False, dover_weight=0.1
+):
     """
     This function takes turns list from all RTTMs and applies an n-dimensional
     matching approximation algorithm to map all to a common label space.
@@ -28,72 +31,94 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
         pairwise_costs = {}
         n = len(turns_list)
 
-        if n==2:
+        if n == 2:
             # if only 2 RTTMs need to be combined, we use the Hungarian algorithm
             # since it is provably optimal. Also, we assign both the systems
             # equal weight to prevent the voting to be dominated by one method.
             new_label_map = _map_hungarian(turns_list[0], turns_list[1])
-            file_to_weights[file_id] = np.array([0.5,0.5])
+            file_to_weights[file_id] = np.array([0.5, 0.5])
 
         else:
-            k = int((n * (n-1)/2))
+            k = int((n * (n - 1) / 2))
 
             has_single_speaker = False
 
             for i, ref_turns in enumerate(turns_list):
                 for j, sys_turns in enumerate(turns_list):
-                    if (j <= i):
+                    if j <= i:
                         continue
                     cost = []
-                    ref_groups = {key: list(group) for key, group in groupby(ref_turns, lambda x: x.speaker_id)};
-                    sys_groups = {key: list(group) for key, group in groupby(sys_turns, lambda x: x.speaker_id)};
+                    ref_groups = {
+                        key: list(group)
+                        for key, group in groupby(ref_turns, lambda x: x.speaker_id)
+                    }
+                    sys_groups = {
+                        key: list(group)
+                        for key, group in groupby(sys_turns, lambda x: x.speaker_id)
+                    }
 
-                    if (len(ref_groups.keys())==1 or len(sys_groups.keys())==1):
+                    if len(ref_groups.keys()) == 1 or len(sys_groups.keys()) == 1:
                         has_single_speaker = True
                     for ref_spk_id in sorted(ref_groups.keys()):
                         cur_row = []
                         ref_spk_turns = ref_groups[ref_spk_id]
                         for sys_spk_id in sorted(sys_groups.keys()):
                             sys_spk_turns = sys_groups[sys_spk_id]
-                            total_overlap = _compute_spk_overlap(ref_spk_turns, sys_spk_turns)
-                            cur_row.append(-1*total_overlap)
+                            total_overlap = _compute_spk_overlap(
+                                ref_spk_turns, sys_spk_turns
+                            )
+                            cur_row.append(-1 * total_overlap)
                         cost.append(cur_row)
 
                     new_axis = list(range(n))
                     new_axis.remove(i)
                     new_axis.remove(j)
-                    pairwise_costs[(i,j)] = np.expand_dims(np.array(cost), axis=tuple(k for k in new_axis))
+                    pairwise_costs[(i, j)] = np.expand_dims(
+                        np.array(cost), axis=tuple(k for k in new_axis)
+                    )
 
-            if has_single_speaker: # iterate and add since numpy cannot broadcast with 2 dummy dimensions
+            if (
+                has_single_speaker
+            ):  # iterate and add since numpy cannot broadcast with 2 dummy dimensions
                 vals = list(pairwise_costs.values())
                 cost_tensor = vals[0]
                 for val in vals[1:]:
-                    cost_tensor = np.add(cost_tensor,val)
-            else: # otherwise use broadcasting
+                    cost_tensor = np.add(cost_tensor, val)
+            else:  # otherwise use broadcasting
                 cost_tensor = np.sum(list(pairwise_costs.values()))
 
-            weights = np.array([0]*len(turns_list), dtype=float)
+            weights = np.array([0] * len(turns_list), dtype=float)
             for i in range(len(turns_list)):
-                cur_pairwise_costs = [np.squeeze(x) for x in pairwise_costs.values() if x.shape[i] != 1]
-                weights[i] = -1*sum([np.sum(x) for x in cur_pairwise_costs])
+                cur_pairwise_costs = [
+                    np.squeeze(x) for x in pairwise_costs.values() if x.shape[i] != 1
+                ]
+                weights[i] = -1 * sum([np.sum(x) for x in cur_pairwise_costs])
 
             out_weights = _compute_weights(weights, dover_weight)
             file_to_weights[file_id] = out_weights
 
             # Sort the cost tensor
-            sorted_idx = np.transpose(np.unravel_index(np.argsort(cost_tensor, axis=None), cost_tensor.shape))
-            
+            sorted_idx = np.transpose(
+                np.unravel_index(np.argsort(cost_tensor, axis=None), cost_tensor.shape)
+            )
+
             # Get the maximal matching Apx3DM-Second algorithm
             M = []
             remaining_idx = {}
             for i in range(len(turns_list)):
                 remaining_idx[i] = []
-                for j in range (cost_tensor.shape[i]):
+                for j in range(cost_tensor.shape[i]):
                     remaining_idx[i].append(j)
-            
-            while (len(remaining_idx.keys()) != 0):
-                print ("{}: {} labels left to be mapped".format(file_id,sum([len(v) for v in remaining_idx.values()])))
-                sorted_idx_filtered = _filter_sorted_index_list(sorted_idx, remaining_idx)
+
+            while len(remaining_idx.keys()) != 0:
+                print(
+                    "{}: {} labels left to be mapped".format(
+                        file_id, sum([len(v) for v in remaining_idx.values()])
+                    )
+                )
+                sorted_idx_filtered = _filter_sorted_index_list(
+                    sorted_idx, remaining_idx
+                )
 
                 # find initial maximal matching
                 M_cur = []
@@ -108,7 +133,9 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
                         change = False
                         for idx in list(M_cur):
                             M_cur.remove(idx)
-                            M_r = _find_remaining_maximal_matching(M_cur, sorted_idx_filtered)
+                            M_r = _find_remaining_maximal_matching(
+                                M_cur, sorted_idx_filtered
+                            )
                             if len(M_r) > 1:
                                 M_cur = M_cur + M_r
                                 change = True
@@ -116,7 +143,7 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
                                 M_cur.append(idx)
 
                 for idx in M_cur:
-                    for i,j in enumerate(idx):
+                    for i, j in enumerate(idx):
                         if i in remaining_idx and j in remaining_idx[i]:
                             remaining_idx[i].remove(j)
 
@@ -127,20 +154,29 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
                 M += M_cur
 
             new_label_map = {}
-            for k,idx_tuple in enumerate(M):
-                for i,j in enumerate(idx_tuple):
-                    if (i,j) not in new_label_map:
-                        new_label_map[(i,j)] = k
-
+            for k, idx_tuple in enumerate(M):
+                for i, j in enumerate(idx_tuple):
+                    if (i, j) not in new_label_map:
+                        new_label_map[(i, j)] = k
 
         mapped_turns_list = []
         for i, turns in enumerate(turns_list):
-            spk_groups = {key: list(group) for key, group in groupby(turns, lambda x: x.speaker_id)}
+            spk_groups = {
+                key: list(group)
+                for key, group in groupby(turns, lambda x: x.speaker_id)
+            }
             mapped_turns = []
-            for j,spk_id in enumerate(spk_groups.keys()):
-                new_spk_id = new_label_map[(i,j)]
+            for j, spk_id in enumerate(spk_groups.keys()):
+                new_spk_id = new_label_map[(i, j)]
                 for turn in spk_groups[spk_id]:
-                    mapped_turns.append(Turn(turn.onset, turn.offset, speaker_id=new_spk_id, file_id=file_id))
+                    mapped_turns.append(
+                        Turn(
+                            turn.onset,
+                            turn.offset,
+                            speaker_id=new_spk_id,
+                            file_id=file_id,
+                        )
+                    )
             mapped_turns_list.append(mapped_turns)
         file_to_mapped_turns_list[file_id] = mapped_turns_list
 
@@ -151,20 +187,25 @@ def get_mapped_turns_list(file_to_turns_list, run_second_maximal=False, dover_we
 # HELPER FUNCTIONS FOR LABEL MAPPING
 ##############################################################################################################
 
+
 def _map_hungarian(ref_turns, sys_turns):
     """
     Use Hungarian algorithm for label mapping for 2 system special case.
     """
     cost_matrix = []
-    ref_groups = {key: list(group) for key, group in groupby(ref_turns, lambda x: x.speaker_id)};
-    sys_groups = {key: list(group) for key, group in groupby(sys_turns, lambda x: x.speaker_id)};
+    ref_groups = {
+        key: list(group) for key, group in groupby(ref_turns, lambda x: x.speaker_id)
+    }
+    sys_groups = {
+        key: list(group) for key, group in groupby(sys_turns, lambda x: x.speaker_id)
+    }
     for ref_spk_id in sorted(ref_groups.keys()):
         cur_row = []
         ref_spk_turns = ref_groups[ref_spk_id]
         for sys_spk_id in sorted(sys_groups.keys()):
             sys_spk_turns = sys_groups[sys_spk_id]
             total_overlap = _compute_spk_overlap(ref_spk_turns, sys_spk_turns)
-            cur_row.append(-1*total_overlap)
+            cur_row.append(-1 * total_overlap)
         cost_matrix.append(cur_row)
 
     cost_matrix = np.array(cost_matrix)
@@ -176,22 +217,22 @@ def _map_hungarian(ref_turns, sys_turns):
     new_label_map = {}
 
     for i in range(len(row_ind)):
-        new_label_map[(0,row_ind[i])] = i
+        new_label_map[(0, row_ind[i])] = i
         row_indices_remaining.remove(row_ind[i])
-        new_label_map[(1,col_ind[i])] = i
+        new_label_map[(1, col_ind[i])] = i
         col_indices_remaining.remove(col_ind[i])
 
-    next_label = i+1
+    next_label = i + 1
 
     # Assign labels to remaining row indices
     while len(row_indices_remaining) != 0:
-        new_label_map[(0,row_indices_remaining[0])] = next_label
+        new_label_map[(0, row_indices_remaining[0])] = next_label
         next_label += 1
         del row_indices_remaining[0]
 
     # Assign labels to remaining col indices
     while len(col_indices_remaining) != 0:
-        new_label_map[(1,col_indices_remaining[0])] = next_label
+        new_label_map[(1, col_indices_remaining[0])] = next_label
         next_label += 1
         del col_indices_remaining[0]
 
@@ -206,9 +247,10 @@ def _compute_weights(weights, dover_weight):
     temp = weights.argsort()
     ranks = np.empty_like(temp)
     ranks[temp] = np.arange(len(weights)) + 1
-    out_weights = 1/np.power(ranks,dover_weight)
+    out_weights = 1 / np.power(ranks, dover_weight)
     out_weights /= np.linalg.norm(out_weights, ord=1)
     return out_weights
+
 
 def _find_remaining_maximal_matching(M, idx_list):
     """
@@ -228,6 +270,7 @@ def _find_remaining_maximal_matching(M, idx_list):
 
     return M_r
 
+
 def _filter_sorted_index_list(sorted_idx, remaining_idx):
     """
     Filter the sorted list of index tuples to only retain tuples for which
@@ -236,21 +279,21 @@ def _filter_sorted_index_list(sorted_idx, remaining_idx):
     sorted_idx_filtered = []
     for idx_tuple in sorted_idx:
         remaining = False
-        for i,j in enumerate(idx_tuple):
+        for i, j in enumerate(idx_tuple):
             if i in remaining_idx and j in remaining_idx[i]:
                 remaining = True
                 break
         if remaining:
             sorted_idx_filtered.append(idx_tuple)
     return sorted_idx_filtered
-        
+
 
 def _contradicts(M, idx_tuple):
     """
     Check if an index tuple contradicts a matching, i.e. return True if
     any index in the tuple is already present in the matching.
     """
-    for i,index in enumerate(idx_tuple):
+    for i, index in enumerate(idx_tuple):
         existing_idx = [idx[i] for idx in M]
         if index in existing_idx:
             return True
@@ -261,17 +304,17 @@ def _compute_spk_overlap(ref_spk_turns, sys_spk_turns):
     tokens = []
     all_turns = ref_spk_turns + sys_spk_turns
     for turn in all_turns:
-        tokens.append(('BEG', turn.onset))
-        tokens.append(('END', turn.offset))
+        tokens.append(("BEG", turn.onset))
+        tokens.append(("END", turn.offset))
     spk_count = 0
     ovl_duration = 0
-    for token in sorted(tokens, key=lambda x:x[1]):
-        if token[0] == 'BEG':
+    for token in sorted(tokens, key=lambda x: x[1]):
+        if token[0] == "BEG":
             spk_count += 1
             if spk_count == 2:
                 ovl_begin = token[1]
         else:
             spk_count -= 1
             if spk_count == 1:
-                ovl_duration += (token[1] - ovl_begin)
-    return ovl_duration/sum([turn.dur for turn in all_turns])
+                ovl_duration += token[1] - ovl_begin
+    return ovl_duration / sum([turn.dur for turn in all_turns])

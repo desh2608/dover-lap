@@ -10,31 +10,31 @@ import sys
 
 from . import six
 
-__all__ = ['clip', 'error', 'format_float', 'groupby', 'info', 'warn', 'xor']
+__all__ = ["clip", "error", "format_float", "groupby", "info", "warn", "xor"]
 
 
 def error(msg, file=sys.stderr):
     """Log error message ``msg`` to stderr."""
-    msg = 'ERROR: %s' % msg
+    msg = "ERROR: %s" % msg
     if six.PY2:
-        msg = msg.encode('utf-8')
+        msg = msg.encode("utf-8")
     print(msg, file=file)
 
 
 def info(msg, print_level=False, file=sys.stdout):
     """Log info message ``msg`` to stdout."""
     if print_level:
-        msg = 'INFO: %s' %msg
+        msg = "INFO: %s" % msg
     if six.PY2:
-        msg = msg.encode('utf-8')
+        msg = msg.encode("utf-8")
     print(msg, file=file)
 
 
 def warn(msg, file=sys.stderr):
     """Log warning message ``msg`` to stderr."""
-    msg = 'WARNING: %s' %msg
+    msg = "WARNING: %s" % msg
     if six.PY2:
-        msg = msg.encode('utf-8')
+        msg = msg.encode("utf-8")
     print(msg, file=file)
 
 
@@ -60,7 +60,7 @@ def format_float(x, n_digits=3):
     s : str
         Formatted string.
     """
-    fmt_str = '%%.%df' % n_digits
+    fmt_str = "%%.%df" % n_digits
     return fmt_str % round(x, n_digits)
 
 

@@ -10,6 +10,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 from collections import defaultdict
+
 try:
     from collections.abc import MutableMapping
 except ImportError:
@@ -22,7 +23,7 @@ from intervaltree import IntervalTree
 from .six import iterkeys
 from .utils import format_float
 
-__all__ = ['gen_uem', 'load_uem', 'write_uem', 'UEM']
+__all__ = ["gen_uem", "load_uem", "write_uem", "UEM"]
 
 
 class UEM(MutableMapping):
@@ -30,15 +31,17 @@ class UEM(MutableMapping):
 
     A UEM defines a mapping from file ids to scoring regions.
     """
+
     def __init__(self, *args, **kwargs):
         super(UEM, self).__init__()
         self.update(*args, **kwargs)
 
     def __setitem__(self, fid, score_regions):
         # Validate types. Expects sequence of (onset, offset) pairs.
-        invalid_type_msg = (
-            'Expected sequence of pairs. Received: %r (%s).' %
-            (score_regions, type(score_regions)))
+        invalid_type_msg = "Expected sequence of pairs. Received: %r (%s)." % (
+            score_regions,
+            type(score_regions),
+        )
         try:
             score_regions = [tuple(region) for region in score_regions]
         except TypeError:
@@ -56,13 +59,16 @@ class UEM(MutableMapping):
                 offset = float(offset)
             except ValueError:
                 raise ValueError(
-                    'Could not convert interval onset/offset to float: %s' %
-                    repr(score_region))
+                    "Could not convert interval onset/offset to float: %s"
+                    % repr(score_region)
+                )
             if onset >= offset or onset < 0:
                 raise ValueError(
-                    'Invalid interval (%.3f, %.3f) for file "%s".' %
-                    (onset, offset, fid))
+                    'Invalid interval (%.3f, %.3f) for file "%s".'
+                    % (onset, offset, fid)
+                )
             return onset, offset
+
         score_regions = [_convert_to_float(region) for region in score_regions]
 
         # Merge overlaps. Use of intervaltree Incurs some additional overhead,
@@ -89,7 +95,7 @@ class UEM(MutableMapping):
         return str(self.__dict__)
 
     def __repr__(self):
-        return '{}, UEM({})'.format(super(UEM, self).__repr__(), self.__dict__)
+        return "{}, UEM({})".format(super(UEM, self).__repr__(), self.__dict__)
 
 
 def load_uem(uemf):
@@ -117,12 +123,12 @@ def load_uem(uemf):
     uem : UEM
         Evaluation map.
     """
-    with open(uemf, 'rb') as f:
+    with open(uemf, "rb") as f:
         fid_to_score_regions = defaultdict(list)
         for line in f:
-            if line.startswith(b';'):
+            if line.startswith(b";"):
                 continue
-            fields = line.decode('utf-8').strip().split()
+            fields = line.decode("utf-8").strip().split()
             file_id = os.path.splitext(fields[0])[0]
             onset = float(fields[2])
             offset = float(fields[3])
@@ -145,16 +151,19 @@ def write_uem(uemf, uem, n_digits=3):
         Number of decimal digits to round to.
         (Default: 3)
     """
-    with open(uemf, 'wb') as f:
+    with open(uemf, "wb") as f:
         for file_id in sorted(iterkeys(uem)):
             for onset, offset in sorted(uem[file_id]):
-                line = ' '.join([file_id,
-                                 '1',
-                                 format_float(onset, n_digits),
-                                 format_float(offset, n_digits)
-                                ])
-                f.write(line.encode('utf-8'))
-                f.write(b'\n')
+                line = " ".join(
+                    [
+                        file_id,
+                        "1",
+                        format_float(onset, n_digits),
+                        format_float(offset, n_digits),
+                    ]
+                )
+                f.write(line.encode("utf-8"))
+                f.write(b"\n")
 
 
 def gen_uem(ref_turns, sys_turns):
