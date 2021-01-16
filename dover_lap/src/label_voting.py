@@ -2,7 +2,6 @@ import numpy as np
 
 from typing import List, Optional, Tuple
 
-from dover_lap.libs.utils import groupby
 from dover_lap.libs.turn import Turn
 
 
