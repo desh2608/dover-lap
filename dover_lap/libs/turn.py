@@ -2,24 +2,12 @@
 
 Taken from https://github.com/nryant/dscore
 """
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from intervaltree import Interval, IntervalTree
 
-from .six import python_2_unicode_compatible
 from .uem import UEM
 from .utils import groupby, warn, xor
 
-__all__ = ["merge_turns", "trim_turns", "Turn"]
 
-
-# TODO: intervaltree is pure Python and a bit of a bottleneck. Explore
-#       alternatives.
-
-
-@python_2_unicode_compatible
 class Turn(object):
     """Speaker turn class.
 

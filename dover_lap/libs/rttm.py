@@ -2,14 +2,8 @@
 
 Taken from https://github.com/nryant/dscore
 """
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-
 from .turn import Turn
 from .utils import format_float
-
-__all__ = ["load_rttm", "write_rttm", "validate_rttm"]
 
 
 def _parse_rttm_line(line):
@@ -80,7 +74,7 @@ def load_rttm(rttmf):
     return turns, speaker_ids, file_ids
 
 
-def write_rttm(rttmf, turns, n_digits=3):
+def write_rttm(rttmf, turns, n_digits=3, channel=1):
     """Write speaker turns to RTTM file.
 
     For a description of the RTTM format, consult Appendix A of the NIST RT-09
@@ -98,6 +92,10 @@ def write_rttm(rttmf, turns, n_digits=3):
         Number of decimal digits to round to.
         (Default: 3)
 
+    channel : int, optional
+        Output channel
+        (Default: 1)
+
     References
     ----------
     NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition
@@ -108,12 +106,12 @@ def write_rttm(rttmf, turns, n_digits=3):
             fields = [
                 "SPEAKER",
                 turn.file_id,
-                "1",
+                str(channel),
                 format_float(turn.onset, n_digits),
                 format_float(turn.dur, n_digits),
                 "<NA>",
                 "<NA>",
-                turn.speaker_id,
+                str(turn.speaker_id),
                 "<NA>",
                 "<NA>",
             ]

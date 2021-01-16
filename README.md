@@ -3,8 +3,7 @@ Official implementation for [DOVER-Lap: A method for combining overlap-aware dia
 
 ## Installation
 
-DOVER-Lap can be simply installed using `pip`, which will also install the
-two dependencies: `numpy` and `intervaltree`, if not present.
+To install, simply run:
 
 ```
 pip install dover-lap
@@ -15,32 +14,48 @@ pip install dover-lap
 After installation, run
 
 ```
-dover-lap -i <input-RTTMs> -o <output-RTTM>
+dover-lap [OPTIONS] OUTPUT_RTTM [INPUT_RTTMS]...
 ```
 
 Example:
 
 ```
-dover-lap -i egs/ami/rttm_test_* -o egs/ami/rttm_dl_test
+dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_*
 ```
 
-## Optional arguments
+## Usage instructions
 
 ```
--u, --uem 
-: UEM file indicating scoring regions
+Usage: dover-lap [OPTIONS] OUTPUT_RTTM [INPUT_RTTMS]...
 
--c, --channel
-: Channel ID for output RTTM (Default: 1)
+  Apply the DOVER-Lap algorithm on the input RTTM files.
 
---second-maximal
-: Boolean argument to specify whether to apply an additional round of maximal
-matching in the label mapping stage. This may perform slightly better for larger
-number of inputs (Default: False)
+Options:
+  --custom-weight TEXT          Weights for input RTTMs
+  --dover-weight FLOAT          DOVER weighting factor  [default: 0.1]
+  --weight-type [rank|custom]   Specify whether to use rank weighting or
+                                provide custom weights  [default: rank]
 
---dover-weight
-: Parameter for DOVER-style rank weighting applied to hypothesis for label
-voting, e.g. w_k = (1/k)^0.1, where k is the rank (Default: 0.1)
+  --tie-breaking [uniform|all]  Specify whether to assign tied regions to all
+                                speakers or divide uniformly  [default: all]
+
+  --second-maximal              If this flag is set, run a second iteration of
+                                the maximal matching for label mapping. It may
+                                give better results sometimes.  [default:
+                                False]
+
+  -c, --channel INTEGER         Use this value for output channel IDs
+                                [default: 1]
+
+  -u, --uem-file PATH           UEM file path
+  --help                        Show this message and exit.
+```
+
+**Note:** If `--weight-type custom` is used, then `--custom-weight` must be provided.
+For example:
+
+```
+dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_* --weight-type custom --custom-weight '[0.4,0.3,0.3]'
 ```
 
 ## Results
@@ -49,7 +64,7 @@ We provide a sample result on the AMI mix-headset test set. The results can be
 obtained as follows:
 
 ```
-dover-lap -i egs/ami/rttm_test_* -o egs/ami/rttm_dl_test
+dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_*
 md-eval.pl -r egs/ami/ref_rttm_test -s egs/ami/rttm_dl_test
 ```
 
@@ -57,10 +72,10 @@ and similarly for the input hypothesis. The DER results are shown below.
 
 |                                   |   MS  |  FA  | Conf. |  DER  |
 |-----------------------------------|:-----:|:----:|:-----:|:-----:|
-| Overlap-aware VB resegmentation   |  9.84 | 2.06 |  9.60 | 21.50 |
+| Overlap-aware VB resegmentation   |  9.84 | **2.06** |  9.60 | 21.50 |
 | Overlap-aware spectral clustering | 11.48 | 2.27 |  9.81 | 23.56 |
 | Region Proposal Network           |  **9.49** | 7.68 |  8.25 | 25.43 |
-| DOVER-Lap                         | 10.96 | **1.99** |  **7.88** | **20.82** |
+| DOVER-Lap                         | 9.71 | 3.00 |  **7.59** | **20.30** |
 
 **Note:** A version of md-eval.pl can be found in `dover_lap/libs`.
 
