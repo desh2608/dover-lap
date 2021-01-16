@@ -1,41 +1,54 @@
-"""Functions for combining multiple RTTMs into one using a DOVER variant."""
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
+import numpy as np
 
-from dover_lap.libs.utils import groupby
+from typing import List, Union, Optional
 
-from .label_mapping import get_mapped_turns_list
-from .label_voting import get_combined_turns
-
-__all__ = ["DOVERLap"]
+from dover_lap.libs.turn import Turn
+from dover_lap.src.label_mapping import LabelMapping
+from dover_lap.src.label_voting import LabelVoting
 
 
 class DOVERLap:
-    def __init__(self, second_maximal, dover_weight):
-        self.second_maximal = second_maximal
-        self.dover_weight = dover_weight
-
-    def combine_turns_list(self, turns_list, file_ids):
-
-        file_to_turns_list = {}
-        for turns in turns_list:
-            for fid, g in groupby(turns, lambda x: x.file_id):
-                if fid in file_to_turns_list:
-                    file_to_turns_list[fid].append(list(g))
-                else:
-                    file_to_turns_list[fid] = [list(g)]
-
+    
+    @classmethod
+    def combine_turns_list(cls,
+        turns_list: List[List[Turn]],
+        file_id: str,
+        second_maximal: Optional[bool]=False,
+        tie_breaking: Optional[str]='uniform',
+        weight_type: Optional[str]='rank',
+        dover_weight: Optional[float]=0.1,
+        custom_weight: Optional[List[str]]=None
+    ) -> List[List[Turn]]:
+        
         # Label mapping stage
-        print("Mapping speaker labels..")
-        file_to_mapped_turns_list, file_to_weights = get_mapped_turns_list(
-            file_to_turns_list, self.second_maximal, self.dover_weight
+        mapped_turns_list, ranks = LabelMapping.get_mapped_turns_list(
+            turns_list,
+            file_id,
+            run_second_maximal=second_maximal
         )
+
+        # Compute weights based on rank
+        if weight_type == 'rank':
+            weights = cls.__compute_weights(ranks, dover_weight)
+        else:
+            assert isinstance(custom_weight, list)
+            weights = np.array([float(x) for x in custom_weight])
 
         # Label voting stage
-        print("Performing speaker voting")
-        file_to_combined_turns = get_combined_turns(
-            file_to_mapped_turns_list, file_to_weights
+        combined_turns_list = LabelVoting.get_combined_turns(
+            mapped_turns_list,
+            file_id,
+            tie_breaking,
+            weights
         )
 
-        return file_to_combined_turns
+        return combined_turns_list
+
+    def __compute_weights(
+        ranks: np.array,
+        weight: float
+    ) -> np.array:
+        
+        out_weights = 1 / np.power(ranks, weight)
+        out_weights /= np.linalg.norm(out_weights, ord=1)
+        return out_weights
