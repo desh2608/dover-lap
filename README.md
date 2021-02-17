@@ -5,7 +5,7 @@ Official implementation for [DOVER-Lap: A method for combining overlap-aware dia
 
 To install, simply run:
 
-```
+```shell
 pip install dover-lap
 ```
 
@@ -13,19 +13,19 @@ pip install dover-lap
 
 After installation, run
 
-```
+```shell
 dover-lap [OPTIONS] OUTPUT_RTTM [INPUT_RTTMS]...
 ```
 
 Example:
 
-```
+```shell
 dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_*
 ```
 
 ## Usage instructions
 
-```
+```shell
 Usage: dover-lap [OPTIONS] OUTPUT_RTTM [INPUT_RTTMS]...
 
   Apply the DOVER-Lap algorithm on the input RTTM files.
@@ -54,7 +54,7 @@ Options:
 **Note:** If `--weight-type custom` is used, then `--custom-weight` must be provided.
 For example:
 
-```
+```shell
 dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_* --weight-type custom --custom-weight '[0.4,0.3,0.3]'
 ```
 
@@ -63,7 +63,7 @@ dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_* --weight-type custom --custom
 We provide a sample result on the AMI mix-headset test set. The results can be 
 obtained as follows:
 
-```
+```shell
 dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_*
 md-eval.pl -r egs/ami/ref_rttm_test -s egs/ami/rttm_dl_test
 ```
