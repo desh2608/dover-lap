@@ -48,6 +48,8 @@ def load_rttms(
 @click.option('--second-maximal', is_flag=True, default=False, show_default=True,
             help='If this flag is set, run a second iteration of the maximal matching for'
                 ' label mapping. It may give better results sometimes.')
+@click.option('--label-mapping', type=click.Choice(['hungarian','greedy','randomized']), 
+            default='greedy', show_default=True, help='Choose label mapping algorithm to use')
 @click.option('--tie-breaking', type=click.Choice(['uniform','all']), default='all',
             help='Specify whether to assign tied regions to all speakers or divide uniformly', show_default=True)
 @click.option('--weight-type', type=click.Choice(['rank','custom']), default='rank',
@@ -95,14 +97,18 @@ def main(
 
     # Run DOVER-Lap algorithm
     file_to_out_turns = dict()
+    total_time_taken = 0
     for file_id in file_to_turns_list:
         info("Processing file {}..".format(file_id), file=sys.stderr)
         turns_list = file_to_turns_list[file_id]
-        file_to_out_turns[file_id] = DOVERLap.combine_turns_list(
+        file_to_out_turns[file_id], time_taken = DOVERLap.combine_turns_list(
             turns_list,
             file_id,
             **kwargs
         )
+        total_time_taken += time_taken
+
+    print (f"Label mapping time (average): {total_time_taken/len(file_to_turns_list.keys())}")
 
     # Write output RTTM file
     write_rttm(

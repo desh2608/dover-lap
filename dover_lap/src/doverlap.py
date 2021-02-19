@@ -13,6 +13,7 @@ class DOVERLap:
     def combine_turns_list(cls,
         turns_list: List[List[Turn]],
         file_id: str,
+        label_mapping: Optional[str]='greedy',
         second_maximal: Optional[bool]=False,
         tie_breaking: Optional[str]='uniform',
         weight_type: Optional[str]='rank',
@@ -21,9 +22,10 @@ class DOVERLap:
     ) -> List[List[Turn]]:
         
         # Label mapping stage
-        mapped_turns_list, ranks = LabelMapping.get_mapped_turns_list(
+        mapped_turns_list, ranks, time_taken = LabelMapping.get_mapped_turns_list(
             turns_list,
             file_id,
+            method=label_mapping,
             run_second_maximal=second_maximal
         )
 
@@ -42,7 +44,7 @@ class DOVERLap:
             weights
         )
 
-        return combined_turns_list
+        return combined_turns_list, time_taken
 
     def __compute_weights(
         ranks: np.array,
