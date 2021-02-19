@@ -27,7 +27,7 @@ class DOVERLap:
             turns_list,
             file_id,
             method=label_mapping,
-            run_second_maximal=second_maximal,
+            second_maximal=second_maximal,
             sort_first=sort_first
         )
 

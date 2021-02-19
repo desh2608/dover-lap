@@ -6,9 +6,7 @@ from typing import List, Dict, Tuple, Optional
 from dover_lap.libs.utils import groupby, info
 from dover_lap.libs.turn import Turn
 
-from .randomized import RandomizedLocalSearchMap
-from .hungarian import HungarianMap
-from .greedy import GreedyMap
+from dover_lap.src.mapping import HungarianMap, GreedyMap, RandomizedMap
 
 
 class LabelMapping:
@@ -18,7 +16,7 @@ class LabelMapping:
         turns_list: List[List[Turn]],
         file_id: str,
         method: Optional[str]='greedy',
-        run_second_maximal: Optional[bool]=False,
+        second_maximal: Optional[bool]=False,
         sort_first: Optional[bool]=False
     ) -> List[List[Turn]]:
         """
@@ -36,7 +34,7 @@ class LabelMapping:
             turns_list = hungarian_map.sorted_turns_list
         
         elif (method == 'greedy'):
-            greedy_map = GreedyMap(second_maximal=run_second_maximal)
+            greedy_map = GreedyMap(second_maximal=second_maximal)
             label_mapping, weights = greedy_map.compute_mapping(turns_list)
         
         elif (method == 'randomized'):

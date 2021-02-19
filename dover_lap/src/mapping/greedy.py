@@ -183,12 +183,12 @@ class GreedyMap:
         """
         S_r = []
         for idx in list(idx_list):
-            if not cls.__contradicts(M, idx):
+            if not self.__contradicts(M, idx):
                 S_r.append(idx)
 
         M_r = []
         for idx in S_r:
-            if not cls.__contradicts(M_r, idx):
+            if not self.__contradicts(M_r, idx):
                 M_r.append(idx)
 
         return M_r
