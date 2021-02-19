@@ -18,7 +18,8 @@ class LabelMapping:
         turns_list: List[List[Turn]],
         file_id: str,
         method: Optional[str]='greedy',
-        run_second_maximal: Optional[bool]=False
+        run_second_maximal: Optional[bool]=False,
+        sort_first: Optional[bool]=False
     ) -> List[List[Turn]]:
         """
         This function takes turns list from all RTTMs and applies an n-dimensional
@@ -27,13 +28,20 @@ class LabelMapping:
 
         import time
         start_time = time.time()
+        
         if (len(turns_list) == 2) or (method == 'hungarian'):
             # We replace the original turns list with one sorted by average DER
-            label_mapping, weights, turns_list = HungarianMap.compute_mapping(turns_list)
+            hungarian_map = HungarianMap(sort_first=sort_first)
+            label_mapping, weights = hungarian_map.compute_mapping(turns_list)
+            turns_list = hungarian_map.sorted_turns_list
+        
         elif (method == 'greedy'):
-            label_mapping, weights = GreedyMap.compute_mapping(turns_list, run_second_maximal)
+            greedy_map = GreedyMap(second_maximal=run_second_maximal)
+            label_mapping, weights = greedy_map.compute_mapping(turns_list)
+        
         elif (method == 'randomized'):
-            label_mapping, weights = RandomizedLocalSearchMap.compute_mapping(turns_list)
+            randomized_map = RandomizedLocalSearchMap(init_method='greedy')
+            label_mapping, weights = randomized_map.compute_mapping(turns_list)
         time_taken = (time.time() - start_time)*1000
 
         # Get mapped speaker labels using the mapping

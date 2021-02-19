@@ -15,6 +15,7 @@ class DOVERLap:
         file_id: str,
         label_mapping: Optional[str]='greedy',
         second_maximal: Optional[bool]=False,
+        sort_first: Optional[bool]=False,
         tie_breaking: Optional[str]='uniform',
         weight_type: Optional[str]='rank',
         dover_weight: Optional[float]=0.1,
@@ -26,7 +27,8 @@ class DOVERLap:
             turns_list,
             file_id,
             method=label_mapping,
-            run_second_maximal=second_maximal
+            run_second_maximal=second_maximal,
+            sort_first=sort_first
         )
 
         # Compute weights based on rank

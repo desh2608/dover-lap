@@ -10,15 +10,41 @@ from .map_utils import *
 
 class GreedyMap:
     
-    @classmethod
-    def compute_mapping(cls,
+    def __init__(self,
+        second_maximal: Optional[bool] = False
+    ) -> None:
+        self.second_maximal = second_maximal
+    
+    def compute_mapping(self,
         turns_list: List[List[Turn]],
-        run_second_maximal: Optional[bool] = False
     ) -> Tuple[Dict[Tuple[int, str], int], np.ndarray]:
         """
         Use the DOVER-Lap greedy label mapping algorithm. Returns a map from
         old labels to new, and the weights for the hypotheses.
         """
+        self.turns_list = turns_list
+        N = len(self.turns_list)
+        cost_tensor, pairwise_costs = self.compute_cost_tensor(turns_list)
+        
+        # The weight of each hypothesis is computed by computing its total
+        # overlap with all other hypotheses
+        weights = np.array([0] * N, dtype=float)
+        for i in range(N):
+            cur_pairwise_costs = [
+                np.squeeze(x) for x in pairwise_costs.values() if x.shape[i] != 1
+            ]
+            weights[i] = -1 * sum([np.sum(x) for x in cur_pairwise_costs])
+
+        label_mapping = self.__apply_maximal_matching(
+            cost_tensor,
+            get_speaker_keys(turns_list),
+        )
+        return (label_mapping, weights)
+
+    def compute_cost_tensor(self,
+        turns_list: List[List[Turn]]
+    ) -> np.ndarray:
+        
         N = len(turns_list)
         k = int((N * (N - 1) / 2))
         pairwise_costs = {}
@@ -71,28 +97,11 @@ class GreedyMap:
         else:
             # otherwise use broadcasting
             cost_tensor = np.sum(list(pairwise_costs.values()))
+        return cost_tensor, pairwise_costs
 
-        # The weight of each hypothesis is computed by computing its total
-        # overlap with all other hypotheses
-        weights = np.array([0] * N, dtype=float)
-        for i in range(N):
-            cur_pairwise_costs = [
-                np.squeeze(x) for x in pairwise_costs.values() if x.shape[i] != 1
-            ]
-            weights[i] = -1 * sum([np.sum(x) for x in cur_pairwise_costs])
-
-        label_mapping = cls.__apply_maximal_matching(
-            cost_tensor,
-            get_speaker_keys(turns_list),
-            run_second_maximal
-        )
-        return (label_mapping, weights)
-
-    @classmethod
-    def __apply_maximal_matching(cls,
+    def __apply_maximal_matching(self,
         cost_tensor: np.ndarray,
         speakers_dict: Dict[Tuple[int,int], str],
-        run_second_maximal: Optional[bool]=False
     ) -> List[List[Turn]]:
 
         # Sort the cost tensor
@@ -115,24 +124,24 @@ class GreedyMap:
                 ),
                 file=sys.stderr
             )
-            sorted_idx_filtered = cls.__filter_sorted_index_list(
+            sorted_idx_filtered = self.__filter_sorted_index_list(
                 sorted_idx, remaining_idx
             )
 
             # find initial maximal matching
             M_cur = []
             for idx in sorted_idx_filtered:
-                if not cls.__contradicts(M_cur, idx):
+                if not self.__contradicts(M_cur, idx):
                     M_cur.append(idx)
 
-            if run_second_maximal:
+            if self.second_maximal:
                 # find second maximal matching
                 change = True
                 while change:
                     change = False
                     for idx in list(M_cur):
                         M_cur.remove(idx)
-                        M_r = cls.__find_remaining_maximal_matching(
+                        M_r = self.__find_remaining_maximal_matching(
                             M_cur, sorted_idx_filtered
                         )
                         if len(M_r) > 1:
@@ -163,8 +172,7 @@ class GreedyMap:
 
         return label_mapping
 
-    @classmethod
-    def __find_remaining_maximal_matching(cls,
+    def __find_remaining_maximal_matching(self,
         M: List[Dict[int,int]],
         idx_list: List[Tuple[int, int]]
     ) -> List[Tuple[int,int]]:
@@ -186,7 +194,7 @@ class GreedyMap:
         return M_r
 
 
-    def __filter_sorted_index_list(
+    def __filter_sorted_index_list(self,
         sorted_idx: List[np.ndarray],
         remaining_idx: List[Tuple[int,int]]
     ) -> List[np.ndarray]:
@@ -206,7 +214,7 @@ class GreedyMap:
         return sorted_idx_filtered
 
 
-    def __contradicts(
+    def __contradicts(self,
         M: List[Dict[int,int]],
         idx_tuple: List[int]
     ) -> bool:

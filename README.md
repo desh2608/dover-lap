@@ -31,24 +31,33 @@ Usage: dover-lap [OPTIONS] OUTPUT_RTTM [INPUT_RTTMS]...
   Apply the DOVER-Lap algorithm on the input RTTM files.
 
 Options:
-  --custom-weight TEXT          Weights for input RTTMs
-  --dover-weight FLOAT          DOVER weighting factor  [default: 0.1]
-  --weight-type [rank|custom]   Specify whether to use rank weighting or
-                                provide custom weights  [default: rank]
+  --custom-weight TEXT            Weights for input RTTMs
+  --dover-weight FLOAT            DOVER weighting factor  [default: 0.1]
+  --weight-type [rank|custom]     Specify whether to use rank weighting or
+                                  provide custom weights  [default: rank]
 
-  --tie-breaking [uniform|all]  Specify whether to assign tied regions to all
-                                speakers or divide uniformly  [default: all]
+  --tie-breaking [uniform|all]    Specify whether to assign tied regions to
+                                  all speakers or divide uniformly  [default:
+                                  all]
 
-  --second-maximal              If this flag is set, run a second iteration of
-                                the maximal matching for label mapping. It may
-                                give better results sometimes.  [default:
-                                False]
+  --sort-first                    If this flag is set, sort inputs by DER
+                                  first before label mapping (only applicable
+                                  when label mapping type is hungarian)
+                                  [default: False]
 
-  -c, --channel INTEGER         Use this value for output channel IDs
-                                [default: 1]
+  --second-maximal                If this flag is set, run a second iteration
+                                  of the maximal matching for greedy label
+                                  mapping  [default: False]
 
-  -u, --uem-file PATH           UEM file path
-  --help                        Show this message and exit.
+  --label-mapping [hungarian|greedy|randomized]
+                                  Choose label mapping algorithm to use
+                                  [default: greedy]
+
+  -c, --channel INTEGER           Use this value for output channel IDs
+                                  [default: 1]
+
+  -u, --uem-file PATH             UEM file path
+  --help                          Show this message and exit.
 ```
 
 **Note:** If `--weight-type custom` is used, then `--custom-weight` must be provided.
@@ -75,7 +84,7 @@ and similarly for the input hypothesis. The DER results are shown below.
 | Overlap-aware VB resegmentation   |  9.84 | **2.06** |  9.60 | 21.50 |
 | Overlap-aware spectral clustering | 11.48 | 2.27 |  9.81 | 23.56 |
 | Region Proposal Network           |  **9.49** | 7.68 |  8.25 | 25.43 |
-| DOVER-Lap                         | 9.71 | 3.00 |  **7.59** | **20.30** |
+| DOVER-Lap                         | 9.71 | 3.02 |  **7.68** | **20.40** |
 
 **Note:** A version of md-eval.pl can be found in `dover_lap/libs`.
 

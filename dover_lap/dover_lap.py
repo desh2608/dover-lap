@@ -11,6 +11,7 @@
 """
 import sys
 import click
+import random
 
 from typing import List
 
@@ -45,11 +46,14 @@ def load_rttms(
 @click.option('-u', '--uem-file', type=click.Path(), help='UEM file path')
 @click.option('-c', '--channel', type=int, default=1, show_default=True,
             help='Use this value for output channel IDs')
-@click.option('--second-maximal', is_flag=True, default=False, show_default=True,
-            help='If this flag is set, run a second iteration of the maximal matching for'
-                ' label mapping. It may give better results sometimes.')
 @click.option('--label-mapping', type=click.Choice(['hungarian','greedy','randomized']), 
             default='greedy', show_default=True, help='Choose label mapping algorithm to use')
+@click.option('--second-maximal', is_flag=True, default=False, show_default=True,
+            help='If this flag is set, run a second iteration of the maximal matching for'
+                ' greedy label mapping')
+@click.option('--sort-first', is_flag=True, default=False, show_default=True,
+            help='If this flag is set, sort inputs by DER first before label mapping '
+                '(only applicable when label mapping type is hungarian)')
 @click.option('--tie-breaking', type=click.Choice(['uniform','all']), default='all',
             help='Specify whether to assign tied regions to all speakers or divide uniformly', show_default=True)
 @click.option('--weight-type', type=click.Choice(['rank','custom']), default='rank',
@@ -101,6 +105,7 @@ def main(
     for file_id in file_to_turns_list:
         info("Processing file {}..".format(file_id), file=sys.stderr)
         turns_list = file_to_turns_list[file_id]
+        random.shuffle(turns_list)  # We shuffle so that the hypothesis order is randomized
         file_to_out_turns[file_id], time_taken = DOVERLap.combine_turns_list(
             turns_list,
             file_id,

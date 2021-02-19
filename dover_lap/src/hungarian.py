@@ -13,57 +13,64 @@ from .map_utils import *
 
 class HungarianMap:
 
-    @classmethod
-    def compute_mapping(cls,
+    def __init__(self,
+        sort_first: Optional[bool] = True
+    ) -> None:
+        self.sort_first = sort_first
+
+    def compute_mapping(self,
         turns_list: List[List[Turn]],
     ) -> Tuple[Dict[Tuple[int, str], int], np.ndarray]:
         """
         Use Hungarian algorithm for label mapping for 2 system special case.
         """
-        weights = cls.__compute_weights(turns_list)
-        sorted_idx = weights.argsort().tolist()
-        sorted_turns_list = [turns_list[i] for i in sorted_idx]
-        cur_turns = sorted_turns_list[0]
-        global_mapping = {}
+        self.turns_list = turns_list
         
-        for i in range(1,len(sorted_turns_list)):
-            next_turns = sorted_turns_list[i]
-            local_mapping = cls.__map_pair(cur_turns, next_turns)
-            cur_turns = cls.__merge_pair(cur_turns, next_turns, local_mapping)
-            global_mapping = cls.__update_global_map(global_mapping, local_mapping)
+        if self.sort_first:
+            weights = self.__compute_weights()
+            sorted_idx = weights.argsort().tolist()
+            self.sorted_turns_list = [self.turns_list[i] for i in sorted_idx]
+        else:
+            weights = np.ones((len(self.turns_list)))
+            self.sorted_turns_list = self.turns_list
+        
+        cur_turns = self.sorted_turns_list[0]
+        self.global_mapping = dict()
+        
+        for i in range(1,len(self.sorted_turns_list)):
+            next_turns = self.sorted_turns_list[i]
+            local_mapping = self.__map_pair(cur_turns, next_turns)
+            cur_turns = self.__merge_pair(cur_turns, next_turns, local_mapping)
+            self.__update_global_map(local_mapping)
 
-        if not cls.__validate_global_mapping(global_mapping, sorted_turns_list):
+        if not self.__validate_global_mapping():
             raise Exception("Some speakers have not been mapped")
-        return global_mapping, weights, sorted_turns_list
+        return self.global_mapping, weights
 
 
-    def __validate_global_mapping(
-        map: Dict[Tuple[int,str], int],
-        turns_list: List[List[Turn]]
+    def __validate_global_mapping(self
     ) -> bool:
-        for i, turns in enumerate(turns_list):
+        for i, turns in enumerate(self.sorted_turns_list):
             groups = {
                 key: list(group) for key, group in groupby(turns, lambda x: x.speaker_id)
             }
             for spk in groups:
-                if (i,spk) not in map:
+                if (i,spk) not in self.global_mapping:
                     return False
         return True
 
-    @classmethod
-    def __compute_weights(cls,
-        turns_list: List[List[Turn]]
-    ) -> List[List[Turn]]:
-        N = len(turns_list)
+    def __compute_weights(self
+    ) -> np.ndarray:
+        N = len(self.turns_list)
         DERs = np.zeros((N,N))
         for i in range(N):
             for j in range(N):
-                DERs[i,j] = DER(turns_list[i], turns_list[j])
+                DERs[i,j] = DER(self.turns_list[i], self.turns_list[j])
         mean_ders = DERs.mean(axis=0)
         return -1*mean_ders
 
 
-    def __map_pair(
+    def __map_pair(self,
         ref_turns: List[Turn],
         sys_turns: List[Turn]
     ) -> Dict[Tuple[int,str], int]:
@@ -114,7 +121,7 @@ class HungarianMap:
 
         return label_mapping
 
-    def __merge_pair(
+    def __merge_pair(self,
         ref_turns: List[Turn],
         sys_turns: List[Turn],
         label_map: Dict[Tuple[int,int], int]
@@ -130,15 +137,15 @@ class HungarianMap:
         all_turns = merge_turns(ref_turns_mapped + sys_turns_mapped)
         return all_turns
 
-    def __update_global_map(
-        global_map: Dict[Tuple[int,str], int],
+    def __update_global_map(self,
         local_map: Dict[Tuple[int,str], int]
-    ) -> Dict[Tuple[int,str], int]:
-        if not global_map:
-            return local_map
+    ) -> None:
+        if not self.global_mapping:
+            self.global_mapping = local_map.copy()
+            return
         new_global_map = {}
         max_file_id = 0
-        for key, old_id in global_map.items():
+        for key, old_id in self.global_mapping.items():
             file_id, spk_id = key
             max_file_id = max(max_file_id, file_id)
             new_global_map[key] = local_map[(0,old_id)]
@@ -146,4 +153,4 @@ class HungarianMap:
             file_id, spk_id = key
             if (file_id == 1):
                 new_global_map[(max_file_id+1,spk_id)] = val
-        return new_global_map
+        self.global_mapping = new_global_map.copy()
