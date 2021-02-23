@@ -12,6 +12,7 @@
 import sys
 import click
 import random
+import numpy as np
 
 from typing import List
 
@@ -48,12 +49,15 @@ def load_rttms(
             help='Use this value for output channel IDs')
 @click.option('--label-mapping', type=click.Choice(['hungarian','greedy','randomized']), 
             default='greedy', show_default=True, help='Choose label mapping algorithm to use')
-@click.option('--second-maximal', is_flag=True, default=False, show_default=True,
-            help='If this flag is set, run a second iteration of the maximal matching for'
-                ' greedy label mapping')
 @click.option('--sort-first', is_flag=True, default=False, show_default=True,
             help='If this flag is set, sort inputs by DER first before label mapping '
                 '(only applicable when label mapping type is hungarian)')
+@click.option('--second-maximal', is_flag=True, default=False, show_default=True,
+            help='If this flag is set, run a second iteration of the maximal matching for'
+                ' greedy label mapping')
+@click.option('--random-seed', default=0, type=int, help='Random seed value')
+@click.option('--random-init', type=click.Choice(['greedy','none']), default='none')
+@click.option('--random-epochs', type=int, default=100, help='Number of epochs when using randomized mapping')
 @click.option('--tie-breaking', type=click.Choice(['uniform','all']), default='all',
             help='Specify whether to assign tied regions to all speakers or divide uniformly', show_default=True)
 @click.option('--weight-type', type=click.Choice(['rank','custom']), default='rank',
@@ -67,9 +71,14 @@ def main(
     output_rttm: click.Path,
     uem_file: click.Path,
     channel: int,
+    random_seed: int,
     **kwargs # these are passed directly to combine_turns_list() method
 ) -> None:
     """Apply the DOVER-Lap algorithm on the input RTTM files."""
+
+    # Set random seeds globally
+    random.seed(random_seed)
+    np.random.seed(random_seed)
     
     # Load hypothesis speaker turns.
     info("Loading speaker turns from input RTTMs...", file=sys.stderr)

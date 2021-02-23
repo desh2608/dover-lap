@@ -16,8 +16,10 @@ class LabelMapping:
         turns_list: List[List[Turn]],
         file_id: str,
         method: Optional[str]='greedy',
+        sort_first: Optional[bool]=False,
         second_maximal: Optional[bool]=False,
-        sort_first: Optional[bool]=False
+        random_init: Optional[str]='none',
+        random_epochs: Optional[int]=100
     ) -> List[List[Turn]]:
         """
         This function takes turns list from all RTTMs and applies an n-dimensional
@@ -38,8 +40,8 @@ class LabelMapping:
             label_mapping, weights = greedy_map.compute_mapping(turns_list)
         
         elif (method == 'randomized'):
-            randomized_map = RandomizedLocalSearchMap(init_method='greedy')
-            label_mapping, weights = randomized_map.compute_mapping(turns_list)
+            randomized_map = RandomizedMap(init_method=random_init)
+            label_mapping, weights = randomized_map.compute_mapping(turns_list, num_epochs=random_epochs)
         time_taken = (time.time() - start_time)*1000
 
         # Get mapped speaker labels using the mapping

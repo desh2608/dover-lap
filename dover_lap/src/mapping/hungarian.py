@@ -7,6 +7,7 @@ from scipy.optimize import linear_sum_assignment
 from dover_lap.libs.utils import groupby, info
 from dover_lap.libs.turn import Turn, merge_turns
 from dover_lap.libs.metrics import DER
+# from simpleder import DER
 
 from .map_utils import *
 
@@ -64,7 +65,10 @@ class HungarianMap:
         N = len(self.turns_list)
         DERs = np.zeros((N,N))
         for i in range(N):
+            # ref = [(turn.speaker_id, turn.onset, turn.offset) for turn in self.turns_list[i]]
             for j in range(N):
+                # hyp = [(turn.speaker_id, turn.onset, turn.offset) for turn in self.turns_list[j]]
+                # DERs[i,j] = DER(ref, hyp).der
                 DERs[i,j] = DER(self.turns_list[i], self.turns_list[j])
         mean_ders = DERs.mean(axis=0)
         return -1*mean_ders
