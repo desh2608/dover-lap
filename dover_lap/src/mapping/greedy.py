@@ -9,13 +9,11 @@ from .map_utils import *
 
 
 class GreedyMap:
-    
-    def __init__(self,
-        second_maximal: Optional[bool] = False
-    ) -> None:
+    def __init__(self, second_maximal: Optional[bool] = False) -> None:
         self.second_maximal = second_maximal
-    
-    def compute_mapping(self,
+
+    def compute_mapping(
+        self,
         turns_list: List[List[Turn]],
     ) -> Tuple[Dict[Tuple[int, str], int], np.ndarray]:
         """
@@ -25,7 +23,7 @@ class GreedyMap:
         self.turns_list = turns_list
         N = len(self.turns_list)
         cost_tensor, pairwise_costs = self.compute_cost_tensor(turns_list)
-        
+
         # The weight of each hypothesis is computed by computing its total
         # overlap with all other hypotheses
         weights = np.array([0] * N, dtype=float)
@@ -41,10 +39,8 @@ class GreedyMap:
         )
         return (label_mapping, weights)
 
-    def compute_cost_tensor(self,
-        turns_list: List[List[Turn]]
-    ) -> np.ndarray:
-        
+    def compute_cost_tensor(self, turns_list: List[List[Turn]]) -> np.ndarray:
+
         N = len(turns_list)
         k = int((N * (N - 1) / 2))
         pairwise_costs = {}
@@ -67,7 +63,7 @@ class GreedyMap:
 
                 if len(ref_groups.keys()) == 1 or len(sys_groups.keys()) == 1:
                     has_single_speaker = True
-                
+
                 for ref_spk_id in sorted(ref_groups.keys()):
                     cur_row = []
                     ref_spk_turns = ref_groups[ref_spk_id]
@@ -99,9 +95,10 @@ class GreedyMap:
             cost_tensor = np.sum(list(pairwise_costs.values()))
         return cost_tensor, pairwise_costs
 
-    def __apply_maximal_matching(self,
+    def __apply_maximal_matching(
+        self,
         cost_tensor: np.ndarray,
-        speakers_dict: Dict[Tuple[int,int], str],
+        speakers_dict: Dict[Tuple[int, int], str],
     ) -> List[List[Turn]]:
 
         # Sort the cost tensor
@@ -112,17 +109,17 @@ class GreedyMap:
         # Get the maximal matching using an approximation algorithm
         M = []
         remaining_idx = {
-            i: list(range(cost_tensor.shape[i]))
-            for i in range(len(cost_tensor.shape))
+            i: list(range(cost_tensor.shape[i])) for i in range(len(cost_tensor.shape))
         }
 
         iter = 1
         while len(remaining_idx.keys()) != 0:
             info(
                 "Iteration {}: {} labels left to be mapped".format(
-                    iter, sum([len(v) for v in remaining_idx.values()]),
+                    iter,
+                    sum([len(v) for v in remaining_idx.values()]),
                 ),
-                file=sys.stderr
+                file=sys.stderr,
             )
             sorted_idx_filtered = self.__filter_sorted_index_list(
                 sorted_idx, remaining_idx
@@ -166,16 +163,15 @@ class GreedyMap:
         for k, idx_tuple in enumerate(M):
             # For each speaker j in hypothesis i, assign new label k
             for i, j in enumerate(idx_tuple):
-                old_spk_id = speakers_dict[(i,j)]
+                old_spk_id = speakers_dict[(i, j)]
                 if (i, old_spk_id) not in label_mapping:
                     label_mapping[(i, old_spk_id)] = k
 
         return label_mapping
 
-    def __find_remaining_maximal_matching(self,
-        M: List[Dict[int,int]],
-        idx_list: List[Tuple[int, int]]
-    ) -> List[Tuple[int,int]]:
+    def __find_remaining_maximal_matching(
+        self, M: List[Dict[int, int]], idx_list: List[Tuple[int, int]]
+    ) -> List[Tuple[int, int]]:
         """
         Given a list of index tuples and a matching M, find a maximal
         matching on the "remaining" list, i.e., using only those index
@@ -193,10 +189,8 @@ class GreedyMap:
 
         return M_r
 
-
-    def __filter_sorted_index_list(self,
-        sorted_idx: List[np.ndarray],
-        remaining_idx: List[Tuple[int,int]]
+    def __filter_sorted_index_list(
+        self, sorted_idx: List[np.ndarray], remaining_idx: List[Tuple[int, int]]
     ) -> List[np.ndarray]:
         """
         Filter the sorted list of index tuples to only retain tuples for which
@@ -213,11 +207,7 @@ class GreedyMap:
                 sorted_idx_filtered.append(idx_tuple)
         return sorted_idx_filtered
 
-
-    def __contradicts(self,
-        M: List[Dict[int,int]],
-        idx_tuple: List[int]
-    ) -> bool:
+    def __contradicts(self, M: List[Dict[int, int]], idx_tuple: List[int]) -> bool:
         """
         Check if an index tuple contradicts a matching, i.e. return True if
         any index in the tuple is already present in the matching.
@@ -227,4 +217,3 @@ class GreedyMap:
             if index in existing_idx:
                 return True
         return False
-
