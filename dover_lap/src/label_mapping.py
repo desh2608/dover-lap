@@ -18,8 +18,6 @@ class LabelMapping:
         method: Optional[str] = "greedy",
         sort_first: Optional[bool] = False,
         second_maximal: Optional[bool] = False,
-        random_init: Optional[str] = "none",
-        random_epochs: Optional[int] = 100,
     ) -> List[List[Turn]]:
         """
         This function takes turns list from all RTTMs and applies an n-dimensional
