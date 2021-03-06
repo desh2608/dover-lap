@@ -3,8 +3,6 @@ Official implementation for [DOVER-Lap: A method for combining overlap-aware dia
 
 ## Installation
 
-To install, simply run:
-
 ```shell
 pip install dover-lap
 ```
@@ -31,41 +29,56 @@ Usage: dover-lap [OPTIONS] OUTPUT_RTTM [INPUT_RTTMS]...
   Apply the DOVER-Lap algorithm on the input RTTM files.
 
 Options:
-  --custom-weight TEXT          Weights for input RTTMs
-  --dover-weight FLOAT          DOVER weighting factor  [default: 0.1]
-  --weight-type [rank|custom]   Specify whether to use rank weighting or
-                                provide custom weights  [default: rank]
+  --custom-weight TEXT            Weights for input RTTMs
+  --dover-weight FLOAT            DOVER weighting factor  [default: 0.1]
+  --weight-type [rank|custom]     Specify whether to use rank weighting or
+                                  provide custom weights  [default: rank]
 
-  --tie-breaking [uniform|all]  Specify whether to assign tied regions to all
-                                speakers or divide uniformly  [default: all]
+  --tie-breaking [uniform|all]    Specify whether to assign tied regions to
+                                  all speakers or divide uniformly  [default:
+                                  all]
 
-  --second-maximal              If this flag is set, run a second iteration of
-                                the maximal matching for label mapping. It may
-                                give better results sometimes.  [default:
-                                False]
+  --second-maximal                If this flag is set, run a second iteration
+                                  of the maximal matching for greedy label
+                                  mapping  [default: False]
 
-  -c, --channel INTEGER         Use this value for output channel IDs
-                                [default: 1]
+  --sort-first                    If this flag is set, sort inputs by DER
+                                  first before label mapping (only applicable
+                                  when label mapping type is hungarian)
+                                  [default: False]
 
-  -u, --uem-file PATH           UEM file path
-  --help                        Show this message and exit.
+  --label-mapping [hungarian|greedy]
+                                  Choose label mapping algorithm to use
+                                  [default: greedy]
+
+  --random-seed INTEGER
+  -c, --channel INTEGER           Use this value for output channel IDs
+                                  [default: 1]
+
+  -u, --uem-file PATH             UEM file path
+  --help                          Show this message and exit.
 ```
 
-**Note:** If `--weight-type custom` is used, then `--custom-weight` must be provided.
-For example:
+**Note:** 
+
+1. If `--weight-type custom` is used, then `--custom-weight` must be provided. For example:
 
 ```shell
 dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_* --weight-type custom --custom-weight '[0.4,0.3,0.3]'
 ```
 
+2. `label-mapping` can be set to `greedy` (default) or `hungarian`, which was the mapping
+technique originally proposed in [DOVER](https://arxiv.org/abs/1909.08090). 
+
 ## Results
 
 We provide a sample result on the AMI mix-headset test set. The results can be 
-obtained as follows:
+obtained using [`spyder`](https://github.com/desh2608/spyder), which is automatically
+installed with `dover-lap`:
 
 ```shell
 dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_*
-md-eval.pl -r egs/ami/ref_rttm_test -s egs/ami/rttm_dl_test
+spyder egs/ami/ref_rttm_test egs/ami/rttm_dl_test
 ```
 
 and similarly for the input hypothesis. The DER results are shown below.
@@ -75,9 +88,10 @@ and similarly for the input hypothesis. The DER results are shown below.
 | Overlap-aware VB resegmentation   |  9.84 | **2.06** |  9.60 | 21.50 |
 | Overlap-aware spectral clustering | 11.48 | 2.27 |  9.81 | 23.56 |
 | Region Proposal Network           |  **9.49** | 7.68 |  8.25 | 25.43 |
-| DOVER-Lap                         | 9.71 | 3.00 |  **7.59** | **20.30** |
+| DOVER-Lap (Hungarian mapping)     | 9.81 | 2.80 | 8.10 | 20.70 |
+| DOVER-Lap (Greedy mapping)        | 9.71 | 3.02 |  **7.68** | **20.40** |
 
-**Note:** A version of md-eval.pl can be found in `dover_lap/libs`.
+
 
 ## Running time
 
