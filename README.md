@@ -88,7 +88,7 @@ and similarly for the input hypothesis. The DER results are shown below.
 | Overlap-aware VB resegmentation   |  9.84 | **2.06** |  9.60 | 21.50 |
 | Overlap-aware spectral clustering | 11.48 | 2.27 |  9.81 | 23.56 |
 | Region Proposal Network           |  **9.49** | 7.68 |  8.25 | 25.43 |
-| DOVER-Lap (Hungarian mapping)     | 9.81 | 2.80 | 8.10 | 20.70 |
+| DOVER-Lap (Hungarian mapping)     | 9.81 | 2.76 | 8.17 | 20.73 |
 | DOVER-Lap (Greedy mapping)        | 9.71 | 3.02 |  **7.68** | **20.40** |
 
 
