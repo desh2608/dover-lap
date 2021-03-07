@@ -55,13 +55,4 @@ class LabelMapping:
                     )
             mapped_turns_list.append(mapped_turns)
 
-        ranks = cls.__get_ranks(weights)
-        return mapped_turns_list, ranks
-
-    def __get_ranks(weights: np.array) -> np.array:
-
-        weights /= np.linalg.norm(weights, ord=1)
-        temp = weights.argsort()
-        ranks = np.empty_like(temp)
-        ranks[temp] = np.arange(len(weights)) + 1
-        return ranks
+        return mapped_turns_list, weights

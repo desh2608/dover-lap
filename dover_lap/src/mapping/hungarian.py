@@ -25,13 +25,11 @@ class HungarianMap:
         """
         self.turns_list = turns_list
 
+        weights = self.__compute_weights()
+        self.sorted_turns_list = self.turns_list
         if self.sort_first:
-            weights = self.__compute_weights()
             sorted_idx = weights.argsort().tolist()
             self.sorted_turns_list = [self.turns_list[i] for i in sorted_idx]
-        else:
-            weights = np.ones((len(self.turns_list)))
-            self.sorted_turns_list = self.turns_list
 
         cur_turns = self.sorted_turns_list[0]
         self.global_mapping = dict()

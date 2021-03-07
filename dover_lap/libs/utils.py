@@ -64,6 +64,7 @@ def groupby(iterable, keyfunc):
     for key, group in itertools.groupby(iterable, keyfunc):
         yield key, group
 
+
 # If an option is selected, other options become required
 def command_required_option(require_name, require_map):
     class CommandOptionRequiredClass(click.Command):
@@ -71,15 +72,21 @@ def command_required_option(require_name, require_map):
             require = ctx.params[require_name]
             if require not in require_map:
                 raise click.ClickException(
-                    "Unexpected value for --'{}': {}".format(
-                        require_name, require))
-            if ctx.params[require_map[require].lower()] is None:
+                    "Unexpected value for --'{}': {}".format(require_name, require)
+                )
+            if (
+                require_map[require] is not None
+                and ctx.params[require_map[require].lower()] is None
+            ):
                 raise click.ClickException(
                     "With {}={} must specify option --{}".format(
-                        require_name, require, require_map[require]))
+                        require_name, require, require_map[require]
+                    )
+                )
             super(CommandOptionRequiredClass, self).invoke(ctx)
 
     return CommandOptionRequiredClass
+
 
 # Class to accept list of arguments as Click option
 class PythonLiteralOption(click.Option):

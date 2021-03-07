@@ -23,7 +23,7 @@ class DOVERLap:
     ) -> List[List[Turn]]:
 
         # Label mapping stage
-        mapped_turns_list, ranks = LabelMapping.get_mapped_turns_list(
+        mapped_turns_list, weights = LabelMapping.get_mapped_turns_list(
             turns_list,
             file_id,
             method=label_mapping,
@@ -33,17 +33,27 @@ class DOVERLap:
 
         # Compute weights based on rank
         if weight_type == "rank":
+            ranks = cls.__get_ranks(weights)
             weights = cls.__compute_weights(ranks, dover_weight)
-        else:
+        elif weight_type == "custom":
             assert isinstance(custom_weight, list)
             weights = np.array([float(x) for x in custom_weight])
+        elif weight_type == "norm":
+            weights /= np.linalg.norm(weights, ord=1)  # use normalized weights
 
         # Label voting stage
         combined_turns_list = LabelVoting.get_combined_turns(
             mapped_turns_list, file_id, tie_breaking, weights
         )
-
         return combined_turns_list
+
+    def __get_ranks(weights: np.array) -> np.array:
+
+        weights /= np.linalg.norm(weights, ord=1)
+        temp = weights.argsort()
+        ranks = np.empty_like(temp)
+        ranks[temp] = np.arange(len(weights)) + 1
+        return ranks
 
     def __compute_weights(ranks: np.array, weight: float) -> np.array:
 

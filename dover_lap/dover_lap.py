@@ -90,7 +90,7 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
 )
 @click.option(
     "--weight-type",
-    type=click.Choice(["rank", "custom"]),
+    type=click.Choice(["rank", "custom", "norm"]),
     default="rank",
     help="Specify whether to use rank weighting or provide custom weights",
     show_default=True,
@@ -107,7 +107,7 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
 )
 @click.command(
     cls=command_required_option(
-        "weight_type", {"custom": "custom_weight", "rank": "dover_weight"}
+        "weight_type", {"custom": "custom_weight", "rank": "dover_weight", "norm": None}
     )
 )
 def main(
