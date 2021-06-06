@@ -67,8 +67,8 @@ Options:
 dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_* --weight-type custom --custom-weight '[0.4,0.3,0.3]'
 ```
 
-2. `label-mapping` can be set to `greedy` (default) or `hungarian`, which was the mapping
-technique originally proposed in [DOVER](https://arxiv.org/abs/1909.08090). 
+2. `label-mapping` can be set to `greedy` (default) or `hungarian`, which is a modified version of the mapping
+technique originally proposed in [DOVER](https://arxiv.org/abs/1909.08090).
 
 ## Results
 
@@ -89,9 +89,9 @@ and similarly for the input hypothesis. The DER results are shown below.
 | Overlap-aware spectral clustering | 11.48 | 2.27 |  9.81 | 23.56 |
 | Region Proposal Network           |  **9.49** | 7.68 |  8.25 | 25.43 |
 | DOVER-Lap (Hungarian mapping)     | 9.81 | 2.76 | 8.17 | 20.73 |
-| DOVER-Lap (Greedy mapping)        | 9.71 | 3.02 |  **7.68** | **20.40** |
+| DOVER-Lap (Greedy mapping)*        | 9.71 | 3.02 |  **7.68** | **20.40** |
 
-
+_* The Greedy label mapping is exponential in number of inputs (see [this paper](https://arxiv.org/abs/2104.01954))._
 
 ## Running time
 
@@ -120,6 +120,13 @@ to performance degradation.
   author={D.Raj and P.Garcia and Z.Huang and S.Watanabe and D.Povey and A.Stolcke and S.Khudanpur},
   journal={2021 IEEE Spoken Language Technology Workshop (SLT)},
   year={2021}
+}
+
+@article{Raj2021ReformulatingDL,
+  title={Reformulating {DOVER-Lap} Label Mapping as a Graph Partitioning Problem},
+  author={Desh Raj and S. Khudanpur},
+  journal={INTERSPEECH},
+  year={2021},
 }
 ```
 
