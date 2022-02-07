@@ -6,7 +6,6 @@ from scipy.optimize import linear_sum_assignment
 
 from dover_lap.libs.utils import groupby, info
 from dover_lap.libs.turn import Turn, merge_turns
-from dover_lap.libs.metrics import DER
 import spyder
 
 from .map_utils import *
