@@ -33,7 +33,7 @@ class GreedyMap:
             ]
             weights[i] = -1 * sum([np.sum(x) for x in cur_pairwise_costs])
 
-        label_mapping = self.__apply_maximal_matching(
+        label_mapping = self._apply_maximal_matching(
             cost_tensor,
             get_speaker_keys(turns_list),
         )
@@ -95,7 +95,7 @@ class GreedyMap:
             cost_tensor = np.sum(list(pairwise_costs.values()))
         return cost_tensor, pairwise_costs
 
-    def __apply_maximal_matching(
+    def _apply_maximal_matching(
         self,
         cost_tensor: np.ndarray,
         speakers_dict: Dict[Tuple[int, int], str],
@@ -121,14 +121,14 @@ class GreedyMap:
                 ),
                 file=sys.stderr,
             )
-            sorted_idx_filtered = self.__filter_sorted_index_list(
+            sorted_idx_filtered = self._filter_sorted_index_list(
                 sorted_idx, remaining_idx
             )
 
             # find initial maximal matching
             M_cur = []
             for idx in sorted_idx_filtered:
-                if not self.__contradicts(M_cur, idx):
+                if not self._contradicts(M_cur, idx):
                     M_cur.append(idx)
 
             if self.second_maximal:
@@ -138,7 +138,7 @@ class GreedyMap:
                     change = False
                     for idx in list(M_cur):
                         M_cur.remove(idx)
-                        M_r = self.__find_remaining_maximal_matching(
+                        M_r = self._find_remaining_maximal_matching(
                             M_cur, sorted_idx_filtered
                         )
                         if len(M_r) > 1:
@@ -169,7 +169,7 @@ class GreedyMap:
 
         return label_mapping
 
-    def __find_remaining_maximal_matching(
+    def _find_remaining_maximal_matching(
         self, M: List[Dict[int, int]], idx_list: List[Tuple[int, int]]
     ) -> List[Tuple[int, int]]:
         """
@@ -179,17 +179,17 @@ class GreedyMap:
         """
         S_r = []
         for idx in list(idx_list):
-            if not self.__contradicts(M, idx):
+            if not self._contradicts(M, idx):
                 S_r.append(idx)
 
         M_r = []
         for idx in S_r:
-            if not self.__contradicts(M_r, idx):
+            if not self._contradicts(M_r, idx):
                 M_r.append(idx)
 
         return M_r
 
-    def __filter_sorted_index_list(
+    def _filter_sorted_index_list(
         self, sorted_idx: List[np.ndarray], remaining_idx: List[Tuple[int, int]]
     ) -> List[np.ndarray]:
         """
@@ -207,7 +207,7 @@ class GreedyMap:
                 sorted_idx_filtered.append(idx_tuple)
         return sorted_idx_filtered
 
-    def __contradicts(self, M: List[Dict[int, int]], idx_tuple: List[int]) -> bool:
+    def _contradicts(self, M: List[Dict[int, int]], idx_tuple: List[int]) -> bool:
         """
         Check if an index tuple contradicts a matching, i.e. return True if
         any index in the tuple is already present in the matching.

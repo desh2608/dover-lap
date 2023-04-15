@@ -3,87 +3,55 @@ import numpy as np
 from typing import List, Optional, Tuple
 
 from dover_lap.libs.turn import Turn
+from dover_lap.src.voting import WeightedAverageVoting
 
 
 class LabelVoting:
     EPS = 1e-3  # to avoid float equality check errors
 
     @classmethod
-    def get_combined_turns(cls,
-        turns_list: List[Turn],
+    def get_combined_turns(
+        cls,
+        turns_list: List[List[Turn]],
         file_id: str,
-        tie_breaking: Optional[str]='uniform',
-        weights: Optional[np.array]=None
+        voting_method: Optional[str] = "average",
+        weights: Optional[np.array] = None,
     ) -> List[Turn]:
         """
         Implements combination using the DOVER-Lap label voting method.
-        :param turns_list, list of mapped speaker turns
+        :param turns_list, list of mapped speaker turns (from each hypothesis)
         :param file_id, name of the file (recording/session)
-        :param tie_breaking, which method to use for breaking ties. Options:
-            - `uniform`: divide ties uniformly between speakers
-            - `all`: assign region to all tied speakers
+        :param voting_method, which method to use for combining labels. Options:
+            - `average`: use weighted average of labels
+            - `hmm`: use a HMM-based voting method
         :param weights, hypothesis weights to use for rank weighting
         """
-        combined_turns_list = []
-        regions = cls.__get_regions(turns_list, weights)
+        regions, start_end = cls.__get_regions(turns_list, weights)
 
-        for region in regions:
-            # Remove problematic regions
-            if np.abs(region[1] - region[0]) < cls.EPS:
-                continue
-            
-            # Get a list of speakers in this region in decreasing order of their weights
-            spk_weights = sorted(region[2], key=lambda x: x[1], reverse=True)
+        if voting_method == "average":
+            voter = WeightedAverageVoting()
+        else:
+            raise ValueError("Unknown voting method: {}".format(voting_method))
 
-            # Estimate the number of speakers in this region. This is computing by
-            # adding all the speaker weights in this region (which is simply equal
-            # to the weighted mean of number of speakers in the hypotheses).
-            num_spk = int(round(sum([spk_weights[1] for spk_weights in region[2]])))
-            
-            i = 0
-            while i < num_spk and len(spk_weights) > 0:
-                cur_weight = spk_weights[0][1]
-                filtered_ids = [
-                    spk_id
-                    for (spk_id, weight) in spk_weights
-                    if np.abs(weight - cur_weight) < cls.EPS
-                ]
-
-                for j, spk_id in enumerate(filtered_ids):
-                    if tie_breaking == 'uniform':
-                        dur = (region[1] - region[0]) / len(filtered_ids)
-                        start_time = region[0] + j * dur
-                        offset = region[0] + (j + 1) * dur
-                    elif tie_breaking == 'all':
-                        start_time = region[0]
-                        offset = region[1]
-                
-                    turn = Turn(
-                        start_time,
-                        offset=offset,
-                        speaker_id=spk_id,
-                        file_id=file_id,
-                    )
-                    combined_turns_list.append(turn)
-                    
-                i += len(filtered_ids)
-                spk_weights = spk_weights[
-                    len(filtered_ids) :
-                ]  # remove the spk ids that have been seen
+        combined_turns_list = voter.get_combined_turns(regions, start_end, file_id)
 
         return combined_turns_list
 
     @classmethod
-    def __get_regions(cls,
-        turns_list: List[Turn],
-        weights: Optional[np.array]=None
-    ) -> List[Tuple[float,float,List[Tuple[int,float]]]]:
+    def __get_regions(
+        cls, turns_list: List[List[Turn]], weights: Optional[np.array] = None
+    ) -> List[Tuple[float, float, List[Tuple[int, float]]]]:
         """
-        Returns homogeneous time regions of the inputs as list of tuples. Regions are
-        demarcated by start or end times of speaker intervals in any of the input
-        hypothesis. Each region tuple also contains a list of the speakers (along
-        with their weights) in that region.
+        Returns homogeneous time regions of the input.
         """
+        # Map speaker ids to consecutive integers (0, 1, 2, ...)
+        spk_index = {}
+        for turns in turns_list:
+            for turn in turns:
+                if turn.speaker_id not in spk_index:
+                    spk_index[turn.speaker_id] = len(spk_index)
+
+        # Add weights to turns, and update speaker id
         if weights is None:
             weights = np.array([1] * len(turns_list))
         weighted_turns_list = []
@@ -93,7 +61,7 @@ class LabelVoting:
                 Turn(
                     turn.onset,
                     offset=turn.offset,
-                    speaker_id=turn.speaker_id,
+                    speaker_id=spk_index[turn.speaker_id],
                     file_id=turn.file_id,
                     weight=weight,
                 )
@@ -110,16 +78,18 @@ class LabelVoting:
 
         sorted_tokens = sorted(tokens, key=lambda x: (x[1], x[0]))
 
-        regions = []
+        regions_list = []
         region_start = sorted_tokens[0][1]
         running_speakers_dict = {sorted_tokens[0][2]: sorted_tokens[0][3]}
         for token in sorted_tokens[1:]:
-            if token[1] > region_start:
+            if token[1] - region_start > cls.EPS:
                 running_speakers = [
                     (k, v) for k, v in running_speakers_dict.items() if v > 0
                 ]
                 if len(running_speakers) > 0:
-                    regions.append((region_start, token[1], running_speakers.copy()))
+                    regions_list.append(
+                        (region_start, token[1], running_speakers.copy())
+                    )
             if token[0] == "START":
                 if token[2] in running_speakers_dict:
                     running_speakers_dict[token[2]] += token[3]
@@ -131,5 +101,13 @@ class LabelVoting:
                     running_speakers_dict[token[2]] = 0
             region_start = token[1]
 
-        return regions
-        
+        # Build regions matrix and start_end matrix
+        regions = np.zeros((len(regions_list), len(spk_index)), dtype=np.float32)
+        start_end = np.zeros((len(regions_list), 2), dtype=np.float32)
+        for i, region in enumerate(regions_list):
+            start_end[i, 0] = region[0]
+            start_end[i, 1] = region[1]
+            for spk, weight in region[2]:
+                regions[i, spk] = weight
+
+        return regions, start_end

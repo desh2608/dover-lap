@@ -1,9 +1,6 @@
-import numpy as np
-import sys
+from typing import List, Dict, Optional
 
-from typing import List, Dict, Tuple, Optional
-
-from dover_lap.libs.utils import groupby, info
+from dover_lap.libs.utils import groupby
 from dover_lap.libs.turn import Turn
 
 from dover_lap.src.mapping import HungarianMap, GreedyMap
