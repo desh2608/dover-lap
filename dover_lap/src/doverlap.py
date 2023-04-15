@@ -2,7 +2,8 @@ import numpy as np
 
 from typing import List, Union, Optional
 
-from dover_lap.libs.turn import Turn
+from dover_lap.libs.turn import Turn, merge_turns
+from dover_lap.libs.utils import is_module_available
 from dover_lap.src.label_mapping import LabelMapping
 from dover_lap.src.label_voting import LabelVoting
 
@@ -16,7 +17,7 @@ class DOVERLap:
         label_mapping: Optional[str] = "greedy",
         sort_first: Optional[bool] = False,
         second_maximal: Optional[bool] = False,
-        tie_breaking: Optional[str] = "uniform",
+        voting_method: Optional[str] = "average",
         weight_type: Optional[str] = "rank",
         dover_weight: Optional[float] = 0.1,
         custom_weight: Optional[List[str]] = None,
@@ -43,8 +44,10 @@ class DOVERLap:
 
         # Label voting stage
         combined_turns_list = LabelVoting.get_combined_turns(
-            mapped_turns_list, file_id, tie_breaking, weights
+            mapped_turns_list, file_id, voting_method, weights
         )
+        # Merge consecutive turns with the same label
+        combined_turns_list = merge_turns(combined_turns_list)
         return combined_turns_list
 
     def __get_ranks(weights: np.array) -> np.array:
