@@ -82,11 +82,12 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
     " greedy label mapping",
 )
 @click.option(
-    "--tie-breaking",
-    type=click.Choice(["uniform", "all"]),
-    default="all",
-    help="Specify whether to assign tied regions to all speakers or divide uniformly",
+    "--voting-method",
+    type=click.Choice(["average"]),
+    default="average",
     show_default=True,
+    help="Choose voting method to use:"
+    " average: use weighted average to combine input RTTMs",
 )
 @click.option(
     "--weight-type",

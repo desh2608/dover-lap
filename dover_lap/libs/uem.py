@@ -9,12 +9,9 @@ Taken from https://github.com/nryant/dscore
 from collections import defaultdict
 from collections.abc import MutableMapping
 
-import itertools
 import os
 
 from intervaltree import IntervalTree
-
-from .utils import format_float
 
 
 class UEM(MutableMapping):

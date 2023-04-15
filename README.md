@@ -34,10 +34,6 @@ Options:
   --weight-type [rank|custom]     Specify whether to use rank weighting or
                                   provide custom weights  [default: rank]
 
-  --tie-breaking [uniform|all]    Specify whether to assign tied regions to
-                                  all speakers or divide uniformly  [default:
-                                  all]
-
   --second-maximal                If this flag is set, run a second iteration
                                   of the maximal matching for greedy label
                                   mapping  [default: False]

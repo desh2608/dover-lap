@@ -1,13 +1,7 @@
-import sys
-import random
+from typing import List, Dict, Tuple
 
-from typing import List, Dict, Tuple, Optional
-from collections import defaultdict
-
-from dover_lap.libs.utils import groupby, info
+from dover_lap.libs.utils import groupby
 from dover_lap.libs.turn import Turn
-
-import numpy as np
 
 
 def compute_spk_overlap(ref_spk_turns: List[Turn], sys_spk_turns: List[Turn]) -> float:
