@@ -3,7 +3,6 @@ import numpy as np
 from typing import List, Union, Optional
 
 from dover_lap.libs.turn import Turn, merge_turns
-from dover_lap.libs.utils import is_module_available
 from dover_lap.src.label_mapping import LabelMapping
 from dover_lap.src.label_voting import LabelVoting
 
