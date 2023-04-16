@@ -66,14 +66,6 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
     help="Choose label mapping algorithm to use",
 )
 @click.option(
-    "--sort-first",
-    is_flag=True,
-    default=False,
-    show_default=True,
-    help="If this flag is set, sort inputs by DER first before label mapping "
-    "(only applicable when label mapping type is hungarian)",
-)
-@click.option(
     "--second-maximal",
     is_flag=True,
     default=False,

@@ -38,11 +38,6 @@ Options:
                                   of the maximal matching for greedy label
                                   mapping  [default: False]
 
-  --sort-first                    If this flag is set, sort inputs by DER
-                                  first before label mapping (only applicable
-                                  when label mapping type is hungarian)
-                                  [default: False]
-
   --label-mapping [hungarian|greedy]
                                   Choose label mapping algorithm to use
                                   [default: greedy]
@@ -93,7 +88,8 @@ _* The Greedy label mapping is exponential in number of inputs (see [this paper]
 
 The algorithm is implemented in pure Python with NumPy for tensor computations. 
 The time complexity is expected to increase exponentially with the number of 
-inputs, but it should be reasonable for combining up to 10 input hypotheses.
+inputs, but it should be reasonable for combining up to 10 input hypotheses. For 
+combining more than 10 inputs, we recommend setting `--label-mapping hungarian`.
 
 For smaller number of inputs (up to 5), the algorithm should take only a few seconds
 to run on a laptop.
@@ -104,8 +100,8 @@ DOVER-Lap is meant to be used to combine **more than 2 systems**, since
 black-box voting between 2 systems does not make much sense. Still, if 2 systems
 are provided as input, we fall back on the Hungarian algorithm for label mapping,
 since it is provably optimal for this case. Both the systems are assigned equal
-weights, and in case of voting conflicts, the region is equally divided among the
-two labels. This is not the intended use case and will almost certainly lead
+weights, and in case of voting conflicts, the region is assigned to both
+labels. This is not the intended use case and will almost certainly lead
 to performance degradation.
 
 ## Citation
