@@ -13,7 +13,6 @@ class LabelMapping:
         turns_list: List[List[Turn]],
         file_id: str,
         method: Optional[str] = "greedy",
-        sort_first: Optional[bool] = False,
         second_maximal: Optional[bool] = False,
     ) -> List[List[Turn]]:
         """
@@ -23,7 +22,7 @@ class LabelMapping:
 
         if (len(turns_list) == 2) or (method == "hungarian"):
             # We replace the original turns list with one sorted by average DER
-            hungarian_map = HungarianMap(sort_first=sort_first)
+            hungarian_map = HungarianMap()
             label_mapping, weights = hungarian_map.compute_mapping(turns_list)
             turns_list = hungarian_map.sorted_turns_list
 

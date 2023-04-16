@@ -10,8 +10,8 @@ from .map_utils import *
 
 
 class HungarianMap:
-    def __init__(self, sort_first: Optional[bool] = True) -> None:
-        self.sort_first = sort_first
+    def __init__(self) -> None:
+        pass
 
     def compute_mapping(
         self,
@@ -24,9 +24,9 @@ class HungarianMap:
 
         weights = self._compute_weights()
         self.sorted_turns_list = self.turns_list
-        if self.sort_first:
-            sorted_idx = weights.argsort().tolist()
-            self.sorted_turns_list = [self.turns_list[i] for i in sorted_idx]
+        # Sort the hypotheses by their weights
+        sorted_idx = weights.argsort().tolist()
+        self.sorted_turns_list = [self.turns_list[i] for i in sorted_idx]
 
         cur_turns = self.sorted_turns_list[0]
         self.global_mapping = dict()

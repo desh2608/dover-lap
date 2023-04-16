@@ -14,7 +14,6 @@ class DOVERLap:
         turns_list: List[List[Turn]],
         file_id: str,
         label_mapping: Optional[str] = "greedy",
-        sort_first: Optional[bool] = False,
         second_maximal: Optional[bool] = False,
         voting_method: Optional[str] = "average",
         weight_type: Optional[str] = "rank",
@@ -28,7 +27,6 @@ class DOVERLap:
             file_id,
             method=label_mapping,
             second_maximal=second_maximal,
-            sort_first=sort_first,
         )
 
         # Compute weights based on rank
