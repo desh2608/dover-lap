@@ -29,10 +29,24 @@ Usage: dover-lap [OPTIONS] OUTPUT_RTTM [INPUT_RTTMS]...
   Apply the DOVER-Lap algorithm on the input RTTM files.
 
 Options:
+  --gaussian-filter-std FLOAT     Standard deviation for Gaussian filter
+                                  applied before voting. This can help reduce
+                                  the effect of outliers in the input RTTMs.
+                                  For quick turn-taking, set this to a small
+                                  value (e.g. 0.1). 0.5 is a good value for
+                                  most cases. Set this to a very small value,
+                                  e.g. 0.01, to remove filtering.  [default:
+                                  0.5]
+
   --custom-weight TEXT            Weights for input RTTMs
   --dover-weight FLOAT            DOVER weighting factor  [default: 0.1]
-  --weight-type [rank|custom]     Specify whether to use rank weighting or
+  --weight-type [rank|custom|norm]
+                                  Specify whether to use rank weighting or
                                   provide custom weights  [default: rank]
+
+  --voting-method [average]       Choose voting method to use: average: use
+                                  weighted average to combine input RTTMs
+                                  [default: average]
 
   --second-maximal                If this flag is set, run a second iteration
                                   of the maximal matching for greedy label
@@ -79,8 +93,8 @@ and similarly for the input hypothesis. The DER results are shown below.
 | Overlap-aware VB resegmentation   |  9.84 | **2.06** |  9.60 | 21.50 |
 | Overlap-aware spectral clustering | 11.48 | 2.27 |  9.81 | 23.56 |
 | Region Proposal Network           |  **9.49** | 7.68 |  8.25 | 25.43 |
-| DOVER-Lap (Hungarian mapping)     | 9.81 | 2.76 | 8.17 | 20.73 |
-| DOVER-Lap (Greedy mapping)*        | 9.71 | 3.02 |  **7.68** | **20.40** |
+| DOVER-Lap (Hungarian mapping)     | 9.98 | 2.13 | 8.25 | 20.35 |
+| DOVER-Lap (Greedy mapping)*        | 9.96 | 2.16 |  **7.75** | **19.86** |
 
 _* The Greedy label mapping is exponential in number of inputs (see [this paper](https://arxiv.org/abs/2104.01954))._
 
