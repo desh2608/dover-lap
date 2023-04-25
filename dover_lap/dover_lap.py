@@ -98,6 +98,16 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
 @click.option(
     "--custom-weight", cls=PythonLiteralOption, help="Weights for input RTTMs"
 )
+@click.option(
+    "--gaussian-filter-std",
+    type=float,
+    default=0.5,
+    help="Standard deviation for Gaussian filter applied before voting. This can help"
+    " reduce the effect of outliers in the input RTTMs. For quick turn-taking, set"
+    " this to a small value (e.g. 0.1). 0.5 is a good value for most cases. Set this"
+    " to a very small value, e.g. 0.01, to remove filtering.",
+    show_default=True,
+)
 @click.command(
     cls=command_required_option(
         "weight_type", {"custom": "custom_weight", "rank": "dover_weight", "norm": None}

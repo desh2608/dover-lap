@@ -2,10 +2,14 @@
 
 Taken from https://github.com/nryant/dscore
 """
+from collections import namedtuple
 from intervaltree import Interval, IntervalTree
 
 from .uem import UEM
 from .utils import groupby, warn, xor
+
+
+Token = namedtuple("Token", ["type", "timestamp", "speaker", "hyp_index", "weight"])
 
 
 class Turn(object):

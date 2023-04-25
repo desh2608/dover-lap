@@ -19,6 +19,7 @@ class DOVERLap:
         weight_type: Optional[str] = "rank",
         dover_weight: Optional[float] = 0.1,
         custom_weight: Optional[List[str]] = None,
+        gaussian_filter_std: float = 0.01,
     ) -> List[List[Turn]]:
 
         # Label mapping stage
@@ -41,7 +42,11 @@ class DOVERLap:
 
         # Label voting stage
         combined_turns_list = LabelVoting.get_combined_turns(
-            mapped_turns_list, file_id, voting_method, weights
+            mapped_turns_list,
+            file_id,
+            voting_method,
+            weights,
+            gaussian_filter_std=gaussian_filter_std,
         )
         # Merge consecutive turns with the same label
         combined_turns_list = merge_turns(combined_turns_list)

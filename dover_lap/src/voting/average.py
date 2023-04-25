@@ -1,14 +1,15 @@
 from typing import Optional, List
 
 import numpy as np
+from scipy.ndimage import gaussian_filter1d
 from scipy.stats import rankdata
 
 from dover_lap.libs.turn import Turn
 
 
 class WeightedAverageVoting:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, gaussian_filter_std: float = 0.01) -> None:
+        self.gaussian_filter_std = gaussian_filter_std
 
     def get_combined_turns(
         self, regions: np.ndarray, start_end: np.ndarray, file_id: str
@@ -16,14 +17,22 @@ class WeightedAverageVoting:
         """
         Implements combination using the DOVER-Lap weighted average voting method.
 
-        :param regions, matrix of shape (num_regions, num_speakers), where each row
-            represents a homogeneous time region, and each column represents a speaker.
-            The value in each cell represents the weight of the speaker in that region.
+        :param regions, matrix of shape (num_regions, num_speakers, num_hypothesis).
+            The value in cell (t, k, n) represents the weight speaker `k` in region `t`
+            contributed by hypothesis `n`.
         :param start_end, list of start and end times for each region
         """
         assert (
             regions.shape[0] == start_end.shape[0]
         ), "Regions and start_end must have the same number of rows"
+
+        # Sum the weights from all hypotheses
+        regions = np.sum(regions, axis=2)
+
+        # Apply Gaussian filter to the regions matrix along the T axis
+        regions = gaussian_filter1d(
+            regions, sigma=self.gaussian_filter_std, axis=0, mode="nearest"
+        )
 
         # Get the number of speakers in each region
         num_spks = np.sum(regions, axis=1).round().astype(int)
