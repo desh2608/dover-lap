@@ -35,7 +35,7 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
     """Loads speaker turns from input RTTMs in a list of turns."""
     turns_list = []
     file_ids = []
-    for rttm_fn in rttm_list:
+    for rttm_fn in sorted(rttm_list):
         try:
             turns_, _, file_ids_ = load_rttm(rttm_fn)
             turns_list.append(turns_)

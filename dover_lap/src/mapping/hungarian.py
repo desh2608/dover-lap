@@ -23,7 +23,6 @@ class HungarianMap:
         self.turns_list = turns_list
 
         weights = self._compute_weights()
-        self.sorted_turns_list = self.turns_list
         # Sort the hypotheses by their weights
         sorted_idx = weights.argsort().tolist()
         self.sorted_turns_list = [self.turns_list[i] for i in sorted_idx]
@@ -54,22 +53,24 @@ class HungarianMap:
 
     def _compute_weights(self) -> np.ndarray:
         N = len(self.turns_list)
-        DERs = np.zeros((N, N))
+        DERs = np.zeros(N)
         for i in range(N):
-            ref = [
+            DER_i = []
+            hyp = [
                 (turn.speaker_id, turn.onset, turn.offset)
                 for turn in self.turns_list[i]
             ]
             for j in range(N):
                 if i == j:
                     continue
-                hyp = [
+                ref = [
                     (turn.speaker_id, turn.onset, turn.offset)
                     for turn in self.turns_list[j]
                 ]
-                DERs[i, j] = DER(ref, hyp).der
-        mean_ders = DERs.mean(axis=1)
-        return -1 * mean_ders
+                der = DER(ref, hyp).der
+                DER_i.append(der)
+            DERs[i] = np.mean(DER_i)
+        return DERs
 
     def _map_pair(
         self, ref_turns: List[Turn], sys_turns: List[Turn]
