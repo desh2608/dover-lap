@@ -15,6 +15,8 @@ class DOVERLap:
         file_id: str,
         label_mapping: Optional[str] = "greedy",
         second_maximal: Optional[bool] = False,
+        random_init: Optional[str] = "none",
+        random_epochs: Optional[int] = 100,
         voting_method: Optional[str] = "average",
         weight_type: Optional[str] = "rank",
         dover_weight: Optional[float] = 0.1,
@@ -28,6 +30,8 @@ class DOVERLap:
             file_id,
             method=label_mapping,
             second_maximal=second_maximal,
+            random_init=random_init,
+            random_epochs=random_epochs,
         )
 
         # Compute weights based on rank

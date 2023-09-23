@@ -57,10 +57,17 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
     show_default=True,
     help="Use this value for output channel IDs",
 )
-@click.option("--random-seed", type=int, default=0)
+@click.option("--random-seed", default=0, type=int, help="Random seed value")
+@click.option("--random-init", type=click.Choice(["greedy", "none"]), default="none")
+@click.option(
+    "--random-epochs",
+    type=int,
+    default=100,
+    help="Number of epochs when using randomized mapping",
+)
 @click.option(
     "--label-mapping",
-    type=click.Choice(["hungarian", "greedy"]),
+    type=click.Choice(["hungarian", "greedy", "randomized"]),
     default="greedy",
     show_default=True,
     help="Choose label mapping algorithm to use",

@@ -3,7 +3,7 @@ from typing import List, Dict, Optional
 from dover_lap.libs.utils import groupby
 from dover_lap.libs.turn import Turn
 
-from dover_lap.src.mapping import HungarianMap, GreedyMap
+from dover_lap.src.mapping import HungarianMap, GreedyMap, RandomizedMap
 
 
 class LabelMapping:
@@ -14,6 +14,8 @@ class LabelMapping:
         file_id: str,
         method: Optional[str] = "greedy",
         second_maximal: Optional[bool] = False,
+        random_init: Optional[str] = "none",
+        random_epochs: Optional[int] = 100,
     ) -> List[List[Turn]]:
         """
         This function takes turns list from all RTTMs and applies an n-dimensional
@@ -29,6 +31,12 @@ class LabelMapping:
         elif method == "greedy":
             greedy_map = GreedyMap(second_maximal=second_maximal)
             label_mapping, weights = greedy_map.compute_mapping(turns_list)
+
+        elif method == "randomized":
+            randomized_map = RandomizedMap(init_method=random_init)
+            label_mapping, weights = randomized_map.compute_mapping(
+                turns_list, num_epochs=random_epochs
+            )
 
         # Get mapped speaker labels using the mapping
         mapped_turns_list = []
