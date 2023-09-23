@@ -61,12 +61,14 @@ class HungarianMap:
                 for turn in self.turns_list[i]
             ]
             for j in range(N):
+                if i == j:
+                    continue
                 hyp = [
                     (turn.speaker_id, turn.onset, turn.offset)
                     for turn in self.turns_list[j]
                 ]
                 DERs[i, j] = DER(ref, hyp).der
-        mean_ders = DERs.mean(axis=0)
+        mean_ders = DERs.mean(axis=1)
         return -1 * mean_ders
 
     def _map_pair(
