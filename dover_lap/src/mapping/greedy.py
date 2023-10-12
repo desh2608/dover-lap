@@ -92,7 +92,7 @@ class GreedyMap:
                 cost_tensor = np.add(cost_tensor, val)
         else:
             # otherwise use broadcasting
-            cost_tensor = np.sum(list(pairwise_costs.values()))
+            cost_tensor = np.sum(np.fromiter(pairwise_costs.values(), dtype=object))
         return cost_tensor, pairwise_costs
 
     def _apply_maximal_matching(

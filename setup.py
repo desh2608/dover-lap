@@ -11,7 +11,7 @@ dev_requires = ["pre-commit", "black", "flake8"]
 
 setup(
     name="dover-lap",
-    version="1.3.1",
+    version="1.3.2",
     author="Desh Raj",
     author_email="r.desh26@gmail.com",
     description="Combine overlap-aware diarization output RTTMs",
