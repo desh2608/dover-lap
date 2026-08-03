@@ -26,9 +26,16 @@ class LabelMapping:
             label_mapping, weights = hungarian_map.compute_mapping(turns_list)
             turns_list = hungarian_map.sorted_turns_list
 
-        elif method == "greedy":
-            greedy_map = GreedyMap(second_maximal=second_maximal)
+        elif method in {"greedy", "greedy-intersection"}:
+            similarity = "intersection" if method.endswith("-intersection") else "iou"
+            greedy_map = GreedyMap(
+                second_maximal=second_maximal,
+                similarity=similarity,
+            )
             label_mapping, weights = greedy_map.compute_mapping(turns_list)
+
+        else:
+            raise ValueError("Unknown label mapping method: {}".format(method))
 
         # Get mapped speaker labels using the mapping
         mapped_turns_list = []

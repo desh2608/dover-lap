@@ -9,8 +9,13 @@ from .map_utils import *
 
 
 class GreedyMap:
-    def __init__(self, second_maximal: Optional[bool] = False) -> None:
+    def __init__(
+        self,
+        second_maximal: Optional[bool] = False,
+        similarity: str = "iou",
+    ) -> None:
         self.second_maximal = second_maximal
+        self.similarity = similarity
 
     def compute_mapping(
         self,
@@ -69,9 +74,15 @@ class GreedyMap:
                     ref_spk_turns = ref_groups[ref_spk_id]
                     for sys_spk_id in sorted(sys_groups.keys()):
                         sys_spk_turns = sys_groups[sys_spk_id]
-                        total_overlap = compute_spk_overlap(
-                            ref_spk_turns, sys_spk_turns
-                        )
+                        if self.similarity == "iou":
+                            # Preserve the original mapping path exactly.
+                            total_overlap = compute_spk_overlap(
+                                ref_spk_turns, sys_spk_turns
+                            )
+                        else:
+                            total_overlap = compute_spk_intersection(
+                                ref_spk_turns, sys_spk_turns
+                            )
                         cur_row.append(-1 * total_overlap)
                     cost.append(cur_row)
 

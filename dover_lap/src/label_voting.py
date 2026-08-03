@@ -19,6 +19,7 @@ class LabelVoting:
         voting_method: Optional[str] = "average",
         weights: Optional[np.array] = None,
         gaussian_filter_std: float = 0.01,
+        tie_method: str = "all",
     ) -> List[Turn]:
         """
         Implements combination using the DOVER-Lap label voting method.
@@ -33,12 +34,22 @@ class LabelVoting:
         """
         regions, start_end = cls.__get_regions(turns_list, weights)
 
-        if voting_method == "average":
-            voter = WeightedAverageVoting(gaussian_filter_std=gaussian_filter_std)
+        cardinality_methods = {"average": "mean", "median": "median"}
+        if voting_method in cardinality_methods:
+            voter = WeightedAverageVoting(
+                gaussian_filter_std=gaussian_filter_std,
+                cardinality_method=cardinality_methods[voting_method],
+                tie_method=tie_method,
+            )
         else:
             raise ValueError("Unknown voting method: {}".format(voting_method))
 
-        combined_turns_list = voter.get_combined_turns(regions, start_end, file_id)
+        combined_turns_list = voter.get_combined_turns(
+            regions,
+            start_end,
+            file_id,
+            weights=weights,
+        )
 
         return combined_turns_list
 

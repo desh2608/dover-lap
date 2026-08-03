@@ -4,6 +4,32 @@ from dover_lap.libs.utils import groupby
 from dover_lap.libs.turn import Turn
 
 
+def compute_spk_intersection(
+    ref_spk_turns: List[Turn],
+    sys_spk_turns: List[Turn],
+) -> float:
+    """Compute the co-active duration of two speaker activity tracks."""
+    ref_turns = sorted(ref_spk_turns, key=lambda turn: (turn.onset, turn.offset))
+    sys_turns = sorted(sys_spk_turns, key=lambda turn: (turn.onset, turn.offset))
+
+    intersection = 0.0
+    ref_index = 0
+    sys_index = 0
+    while ref_index < len(ref_turns) and sys_index < len(sys_turns):
+        ref_turn = ref_turns[ref_index]
+        sys_turn = sys_turns[sys_index]
+        intersection += max(
+            0.0,
+            min(ref_turn.offset, sys_turn.offset) - max(ref_turn.onset, sys_turn.onset),
+        )
+        if ref_turn.offset <= sys_turn.offset:
+            ref_index += 1
+        else:
+            sys_index += 1
+
+    return intersection
+
+
 def compute_spk_overlap(ref_spk_turns: List[Turn], sys_spk_turns: List[Turn]) -> float:
     """
     Computes 'relative' overlap, i.e. Intersection Over Union
