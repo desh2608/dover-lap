@@ -21,6 +21,24 @@ Example:
 dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_*
 ```
 
+For the robust, reference-free configuration developed on the bundled AMI
+example, run:
+
+```shell
+dover-lap egs/ami/rttm_robust_test egs/ami/rttm_test_* \
+  --label-mapping greedy-intersection \
+  --voting-method median \
+  --weight-type equal \
+  --tie-method global \
+  --gaussian-filter-std 0.01
+```
+
+This configuration uses raw co-active duration for label mapping, the median
+input speaker count in each region, equal system weights, and recording-level
+speaker support to break exact vote ties. It is training-free, runs entirely on
+CPU, and does not use a reference RTTM during fusion. The original defaults are
+unchanged.
+
 ## Usage instructions
 
 ```shell
@@ -40,19 +58,23 @@ Options:
 
   --custom-weight TEXT            Weights for input RTTMs
   --dover-weight FLOAT            DOVER weighting factor  [default: 0.1]
-  --weight-type [rank|custom|norm]
+  --weight-type [rank|custom|norm|equal]
                                   Specify whether to use rank weighting or
                                   provide custom weights  [default: rank]
 
-  --voting-method [average]       Choose voting method to use: average: use
-                                  weighted average to combine input RTTMs
+  --tie-method [all|global]
+                                  How to resolve a label-score tie at the
+                                  cardinality cutoff  [default: all]
+
+  --voting-method [average|median]
+                                  Choose the local speaker-count estimator
                                   [default: average]
 
   --second-maximal                If this flag is set, run a second iteration
                                   of the maximal matching for greedy label
                                   mapping  [default: False]
 
-  --label-mapping [hungarian|greedy]
+  --label-mapping [hungarian|greedy|greedy-intersection]
                                   Choose label mapping algorithm to use
                                   [default: greedy]
 
@@ -72,8 +94,9 @@ Options:
 dover-lap egs/ami/rttm_dl_test egs/ami/rttm_test_* --weight-type custom --custom-weight '[0.4,0.3,0.3]'
 ```
 
-2. `label-mapping` can be set to `greedy` (default) or `hungarian`, which is a modified version of the mapping
-technique originally proposed in [DOVER](https://arxiv.org/abs/1909.08090).
+2. `label-mapping` can be set to `greedy` (default), `greedy-intersection`, or
+`hungarian`. The Hungarian option is a modified version of the mapping technique
+originally proposed in [DOVER](https://arxiv.org/abs/1909.08090).
 
 ## Results
 
@@ -94,9 +117,15 @@ and similarly for the input hypothesis. The DER results are shown below.
 | Overlap-aware spectral clustering | 11.48 | 2.27 |  9.81 | 23.56 |
 | Region Proposal Network           |  **9.49** | 7.68 |  8.25 | 25.43 |
 | DOVER-Lap (Hungarian mapping)     | 9.98 | 2.13 | 8.25 | 20.35 |
-| DOVER-Lap (Greedy mapping)*        | 9.96 | 2.16 |  **7.75** | **19.86** |
+| DOVER-Lap (Greedy mapping)*        | 9.96 | 2.16 |  7.75 | 19.86 |
+| DOVER-Lap (Robust configuration)  | 10.27 | **1.72** | **6.99** | **18.99** |
 
 _* The Greedy label mapping is exponential in number of inputs (see [this paper](https://arxiv.org/abs/2104.01954))._
+
+The robust configuration was selected on the EN2002 and IS1009 meetings. On the
+held-out ES2004 and TS3003 meetings it scores 14.56% DER, compared with 14.92%
+for the default configuration. The 18.99% figure above is the final score over
+all 17 bundled recordings.
 
 ## Running time
 

@@ -60,7 +60,7 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
 @click.option("--random-seed", type=int, default=0)
 @click.option(
     "--label-mapping",
-    type=click.Choice(["hungarian", "greedy"]),
+    type=click.Choice(["hungarian", "greedy", "greedy-intersection"]),
     default="greedy",
     show_default=True,
     help="Choose label mapping algorithm to use",
@@ -75,15 +75,21 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
 )
 @click.option(
     "--voting-method",
-    type=click.Choice(["average"]),
+    type=click.Choice(["average", "median"]),
     default="average",
     show_default=True,
-    help="Choose voting method to use:"
-    " average: use weighted average to combine input RTTMs",
+    help="Choose the mean or median local speaker-count estimator",
+)
+@click.option(
+    "--tie-method",
+    type=click.Choice(["all", "global"]),
+    default="all",
+    show_default=True,
+    help="Use recording-level support to resolve label-score ties",
 )
 @click.option(
     "--weight-type",
-    type=click.Choice(["rank", "custom", "norm"]),
+    type=click.Choice(["rank", "custom", "norm", "equal"]),
     default="rank",
     help="Specify whether to use rank weighting or provide custom weights",
     show_default=True,
@@ -110,7 +116,13 @@ def load_rttms(rttm_list: List[str]) -> List[List[Turn]]:
 )
 @click.command(
     cls=command_required_option(
-        "weight_type", {"custom": "custom_weight", "rank": "dover_weight", "norm": None}
+        "weight_type",
+        {
+            "custom": "custom_weight",
+            "rank": "dover_weight",
+            "norm": None,
+            "equal": None,
+        },
     )
 )
 def main(

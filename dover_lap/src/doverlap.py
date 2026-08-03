@@ -20,6 +20,7 @@ class DOVERLap:
         dover_weight: Optional[float] = 0.1,
         custom_weight: Optional[List[str]] = None,
         gaussian_filter_std: float = 0.01,
+        tie_method: str = "all",
     ) -> List[List[Turn]]:
 
         # Label mapping stage
@@ -39,6 +40,8 @@ class DOVERLap:
             weights = np.array([float(x) for x in custom_weight])
         elif weight_type == "norm":
             weights /= np.linalg.norm(weights, ord=1)  # use normalized weights
+        elif weight_type == "equal":
+            weights = np.full(len(turns_list), 1.0 / len(turns_list))
 
         # Label voting stage
         combined_turns_list = LabelVoting.get_combined_turns(
@@ -47,6 +50,7 @@ class DOVERLap:
             voting_method,
             weights,
             gaussian_filter_std=gaussian_filter_std,
+            tie_method=tie_method,
         )
         # Merge consecutive turns with the same label
         combined_turns_list = merge_turns(combined_turns_list)
